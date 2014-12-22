@@ -9,7 +9,6 @@ public interface RepositoryProvider {
 
 	/**
 	 * the provider uploads all given pacts to the given url.
-	 * @param url
 	 * @param pacts
 	 * @throws Exception
 	 */
@@ -18,8 +17,8 @@ public interface RepositoryProvider {
 	
 	/**
 	 * the provider downloads all necessary pacts to the given repository
-	 * @param url
-	 * @param pacts
+	 * @param providerId
+	 * @param targetDirectory
 	 * @throws Exception
 	 */
 	public void downloadPacts(String providerId, File targetDirectory) throws Exception;

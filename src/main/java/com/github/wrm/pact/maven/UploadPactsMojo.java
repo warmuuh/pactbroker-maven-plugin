@@ -6,31 +6,31 @@ import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Execute;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 import com.github.wrm.pact.domain.PactFile;
 import com.github.wrm.pact.repository.RepositoryProvider;
 
 /**
  * Verifies all pacts that can be found for this provider
- *
- * @goal upload-pacts
- * 
- * @phase test
  */
+@Mojo(name="upload-pacts")
+@Execute(phase=LifecyclePhase.TEST)
 public class UploadPactsMojo extends AbstractPactsMojo {
 
 	/**
 	 * url of pact broker
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private String brokerUrl;
 
 	/**
 	 * Location of pacts
-	 * 
-	 * @parameter expression="target/pacts"
 	 */
+	@Parameter(defaultValue="target/pacts")
 	private String pacts;
 
 	public void execute() throws MojoExecutionException, MojoFailureException {
