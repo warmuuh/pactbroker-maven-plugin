@@ -12,6 +12,9 @@
     <github.global.server>github</github.global.server>
   </properties>
 
+	<scm>
+		<connection>scm:git:git@github.com:warmuuh/pactbroker-maven-plugin.git</connection>
+	</scm>
 
   <dependencies>
     <dependency>

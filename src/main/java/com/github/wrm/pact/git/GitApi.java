@@ -26,7 +26,7 @@ public class GitApi {
 	
 	/**
 	 * adds, commits and pushes changes only, if there are actually changes
-	 * @param repository
+	 * @param message
 	 * @return false, if there were no changes to be pushed
 	 * @throws Exception
 	 */
