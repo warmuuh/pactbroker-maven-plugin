@@ -11,6 +11,16 @@ To be honest, only git is currently supported. fork and add to your pleasure.
 
 Installation
 -----
+add on-demand-repository (using https://jitpack.io/)
+```
+<repositories>
+ <repository>
+	    <id>jitpack.io</id>
+	    <url>https://jitpack.io</url>
+	</repository>
+<repositories>
+```
+or install locally
 ```
 git clone ...
 cd pactbroker-maven-plugin
