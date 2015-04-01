@@ -13,12 +13,12 @@ Installation
 -----
 add on-demand-repository (using https://jitpack.io/)
 ```
-<repositories>
- <repository>
-	    <id>jitpack.io</id>
-	    <url>https://jitpack.io</url>
-	</repository>
-</repositories>
+<pluginRepositories>
+	<pluginRepository>
+		<id>jitpack.io</id>
+		<url>https://jitpack.io</url>
+	</pluginRepository>
+</pluginRepositories>
 ```
 or install locally
 ```
