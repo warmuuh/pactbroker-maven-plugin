@@ -72,6 +72,7 @@ the *download-pacts* goal is used:
         <provider>provider</provider>
       </configuration>
       <executions><execution>
+        <phase>generate-resources</phase>
         <goals><goal>download-pacts</goal></goals>
       </execution></executions>
     </plugin>
