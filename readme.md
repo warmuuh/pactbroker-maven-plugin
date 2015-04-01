@@ -72,7 +72,7 @@ the *download-pacts* goal is used:
         <provider>provider</provider>
       </configuration>
       <executions><execution>
-        <goals><goal>upload-pacts</goal></goals>
+        <goals><goal>download-pacts</goal></goals>
       </execution></executions>
     </plugin>
   </plugins>
