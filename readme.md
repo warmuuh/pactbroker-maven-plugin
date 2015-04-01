@@ -1,7 +1,7 @@
-Pact Maven Plugin
+Pactbroker Maven Plugin
 ==========
 
-Pact Maven Plugin integrates with [PactBroker](https://github.com/bethesque/pact_broker) and allows to
+Pactbroker Maven Plugin integrates with [PactBroker](https://github.com/bethesque/pact_broker) and allows to
 upload pacts created by consumer rsp download pacts that are verified against providers.
 
 It also allows to use a **git-repository** instead of a PactBroker-instance
@@ -18,7 +18,7 @@ add on-demand-repository (using https://jitpack.io/)
 	    <id>jitpack.io</id>
 	    <url>https://jitpack.io</url>
 	</repository>
-<repositories>
+</repositories>
 ```
 or install locally
 ```
