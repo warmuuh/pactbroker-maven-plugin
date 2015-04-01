@@ -38,7 +38,7 @@ Configure plugin in your pom.xml using the *upload-pacts* goal:
 <build>
   <plugins>
   <plugin>
-    <groupId>com.github.wrm</groupId>
+    <groupId>com.github.warmuuh</groupId>
     <artifactId>pactbroker-maven-plugin</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <configuration>
