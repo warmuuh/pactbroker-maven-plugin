@@ -37,17 +37,17 @@ Configure plugin in your pom.xml using the *upload-pacts* goal:
 ```xml
 <build>
   <plugins>
-  <plugin>
-    <groupId>com.github.warmuuh</groupId>
-    <artifactId>pactbroker-maven-plugin</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <configuration>
-      <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
-      <pacts>target/pacts</pacts>
-    </configuration>
-    <executions><execution>
-      <goals><goal>upload-pacts</goal></goals>
-    </execution></executions>
+    <plugin>
+      <groupId>com.github.warmuuh</groupId>
+      <artifactId>pactbroker-maven-plugin</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+      <configuration>
+        <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
+        <pacts>target/pacts</pacts>
+      </configuration>
+      <executions><execution>
+        <goals><goal>upload-pacts</goal></goals>
+      </execution></executions>
     </plugin>
   </plugins>
 </build>
