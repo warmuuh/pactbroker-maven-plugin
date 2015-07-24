@@ -4,10 +4,7 @@ Pactbroker Maven Plugin
 Pactbroker Maven Plugin integrates with [PactBroker](https://github.com/bethesque/pact_broker) and allows to
 upload pacts created by consumer rsp download pacts that are verified against providers.
 
-It also allows to use a **git-repository** instead of a PactBroker-instance
- as simplification so no additional infrastructure is needed.
-
-To be honest, only git is currently supported. fork and add to your pleasure.
+It also allows to use a **git-repository** instead of a PactBroker-instance as simplification so no additional infrastructure is needed.
 
 Installation
 -----
@@ -81,4 +78,4 @@ the *download-pacts* goal is used:
 ```
 
 ##Missing Features
-  * real pactBroker Rest interfacing is not implemented right now, just git-support (;D)
+  * Downloading from Pact Broker is not supported yet.
