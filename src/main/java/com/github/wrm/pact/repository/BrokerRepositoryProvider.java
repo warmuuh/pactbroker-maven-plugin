@@ -46,6 +46,8 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
     }
 
     public void downloadPactsFromLinks(List<String> links, File targetDirectory) throws IOException {
+        targetDirectory.mkdirs();
+
         for (String link : links) {
             downloadPactFromLink(targetDirectory, link);
         }
