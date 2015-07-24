@@ -77,5 +77,3 @@ the *download-pacts* goal is used:
 </build>
 ```
 
-##Missing Features
-  * Downloading from Pact Broker is not supported yet.
