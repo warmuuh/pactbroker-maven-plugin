@@ -20,6 +20,7 @@ import au.com.dius.pact.consumer.PactRule;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.PactFragment;
 
+import com.github.wrm.pact.OpenPortProvider;
 import com.github.wrm.pact.domain.PactFile;
 
 public class BrokerRepositoryProviderTest {
@@ -30,11 +31,13 @@ public class BrokerRepositoryProviderTest {
     private static final String PACT_JSON = "{ \"provider\": { \"name\": \"" + PROVIDER_NAME
             + "\" }, \"consumer\": { \"name\": \"" + CONSUMER_NAME + "\" } }";
 
+    private int port = OpenPortProvider.getOpenPort();
+
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Rule
-    public PactRule rule = new PactRule("localhost", 8089, this);
+    public PactRule rule = new PactRule("localhost", port, this);
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -49,7 +52,7 @@ public class BrokerRepositoryProviderTest {
             out.write(PACT_JSON);
         }
         pact = PactFile.readPactFile(pactFile);
-        brokerRepositoryProvider = new BrokerRepositoryProvider("http://localhost:8089", CONSUMER_VERSION,
+        brokerRepositoryProvider = new BrokerRepositoryProvider("http://localhost:" + port, CONSUMER_VERSION,
                 new SystemStreamLog());
     }
 
