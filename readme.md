@@ -60,7 +60,7 @@ the *download-pacts* goal is used:
 <build>
   <plugins>
     <plugin>
-      <groupId>com.github.wrm</groupId>
+      <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
       <version>0.0.5-SNAPSHOT</version>
       <configuration>
