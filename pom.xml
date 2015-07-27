@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.warmuuh</groupId>
   <artifactId>pactbroker-maven-plugin</artifactId>
-  <version>0.0.4</version>
+  <version>0.0.5-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <properties>
@@ -42,6 +42,18 @@
       <artifactId>maven-plugin-annotations</artifactId>
       <version>3.3</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>au.com.dius</groupId>
+      <artifactId>pact-jvm-consumer-junit_2.11</artifactId>
+      <version>2.2.1</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

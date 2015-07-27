@@ -1,83 +1,150 @@
 package com.github.wrm.pact.repository;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+
+import org.apache.maven.plugin.logging.Log;
 
 import com.github.wrm.pact.domain.PactFile;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public class BrokerRepositoryProvider implements RepositoryProvider {
 
-	@Override
-	public void uploadPacts(List<PactFile> pacts) throws Exception {
-		//TODO
-	}
+    private final String url;
+    private final String consumerVersion;
+    private final Log log;
 
-	@Override
-	public void downloadPacts(String providerId, File targetDirectory) throws Exception {
-		//TODO		
-	}
-	
-	
-//	
-//	private void uploadPact(String consumer, String provider, File file) throws Throwable {
-//		String request = pactBroker + "/pact/provider/" + provider + "/consumer/" + consumer;
-//		getLog().info("uploading to " + request);
-//		URL url = new URL(request); 
-//		HttpURLConnection connection = (HttpURLConnection) url.openConnection();           
-//		connection.setDoOutput(true);
-//		connection.setDoInput(true);
-////		connection.setInstanceFollowRedirects(false); 
-//		connection.setRequestMethod("POST"); 
-//		connection.setRequestProperty("Content-Type", "application/json"); 
-//		connection.setRequestProperty("Accept", "application/json");
-//		connection.setRequestProperty("charset", "utf-8");
-////		connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
-////		connection.setUseCaches (false);
-//
-////		DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-//		OutputStreamWriter wr= new OutputStreamWriter(connection.getOutputStream());
-//		String content = readFile(file, Charset.defaultCharset());
-//		System.out.println(content);
-//		wr.write(content);
-//		wr.flush();
-//		System.out.println(connection.getResponseMessage());
-//		wr.close();
-//		connection.disconnect();
-//	}
-//
-//	static String readFile(File file, Charset encoding) throws IOException {
-//		byte[] encoded = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
-//		return new String(encoded, encoding);
-//	}
+    public BrokerRepositoryProvider(String url, String consumerVersion, Log log) {
+        this.url = url;
+        this.consumerVersion = consumerVersion;
+        this.log = log;
+    }
 
-	
+    @Override
+    public void uploadPacts(List<PactFile> pacts) throws Exception {
+        for (PactFile pact : pacts) {
+            uploadPact(pact);
+        }
+    }
 
-//	private void downloadPacts() throws Throwable {
-//		String request = pactBroker + "/pact/provider/" + provider;
-//
-//		FileUtils.deleteDirectory(new File(pacts + "/"));
-//		getLog().info("downloading from " + request);
-//		URL url = new URL(request); 
-//		String content = readStream(url.openStream());
-//		JsonElement jelement = new JsonParser().parse(content);
-//		JsonArray arr = jelement.getAsJsonArray();
-//		for(int i = 0; i < arr.size(); ++i){
-//			String provider = arr.get(i).getAsJsonObject().get("provider").getAsJsonObject().get("name").getAsString();
-//			String consumer = arr.get(i).getAsJsonObject().get("consumer").getAsJsonObject().get("name").getAsString();
-//			
-//			
-//			new File(pacts + "/").mkdirs();
-//			File targetFile = new File(pacts + "/" + consumer + "-" + provider + ".json");
-//			getLog().info("writing to " + targetFile);
-////			targetFile..mkdirs();
-//			FileWriter writer = new FileWriter(targetFile);
-//			writer.write(arr.get(i).toString());
-//			writer.close();
-//		}
-//		
-//	}
-//
-//	static String readStream(InputStream stream) throws IOException {
-//		return IOUtils.toString(stream);
-//	}
+    @Override
+    public void downloadPacts(String providerId, File targetDirectory) throws Exception {
+        downloadPactsFromLinks(downloadPactLinks(providerId), targetDirectory);
+    }
+
+    public void downloadPactsFromLinks(List<String> links, File targetDirectory) throws IOException {
+        targetDirectory.mkdirs();
+
+        for (String link : links) {
+            downloadPactFromLink(targetDirectory, link);
+        }
+    }
+
+    public List<String> downloadPactLinks(String providerId) throws IOException {
+        String path = buildDownloadLinksPath(providerId);
+
+        log.info("Downloading pact links from " + path);
+
+        URL url = new URL(path);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoInput(true);
+        connection.setDoOutput(true);
+
+        List<String> links = new ArrayList<>();
+
+        if (connection.getResponseCode() != 200) {
+            log.error("Downloading pact links failed. Pact Broker answered with: " + connection.getContent());
+            return links;
+        }
+
+        try (Scanner scanner = new Scanner(connection.getInputStream(), StandardCharsets.UTF_8.displayName())) {
+            JsonElement jelement = new JsonParser().parse(scanner.useDelimiter("\\A").next());
+
+            JsonArray asJsonArray = jelement.getAsJsonObject().get("_links").getAsJsonObject().get("pacts")
+                    .getAsJsonArray();
+
+            asJsonArray.forEach(element -> {
+                links.add(element.getAsJsonObject().get("href").getAsString());
+            });
+        }
+
+        return links;
+    }
+
+    private void uploadPact(PactFile pact) throws IOException {
+        String path = buildUploadPath(pact);
+
+        log.info("Uploading pact to " + path);
+
+        URL url = new URL(path);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setDoOutput(true);
+        connection.setDoInput(true);
+        connection.setRequestMethod("PUT");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("charset", StandardCharsets.UTF_8.displayName());
+
+        byte[] content = Files.readAllBytes(Paths.get(pact.getPath()));
+        connection.getOutputStream().write(content);
+
+        if (connection.getResponseCode() != 200) {
+            log.error("Uploading failed. Pact Broker answered with: " + connection.getContent());
+        }
+
+        connection.disconnect();
+    }
+
+    private void downloadPactFromLink(File targetDirectory, String link) throws MalformedURLException, IOException,
+            FileNotFoundException {
+        URL url = new URL(link);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoInput(true);
+
+        if (connection.getResponseCode() != 200) {
+            log.error("Downloading pact failed. Pact Broker answered with: " + connection.getContent());
+            return;
+        }
+
+        log.info("Downloading pact from " + link);
+
+        try (Scanner scanner = new Scanner(connection.getInputStream(), StandardCharsets.UTF_8.displayName())) {
+            String pact = scanner.useDelimiter("\\A").next();
+
+            JsonElement jelement = new JsonParser().parse(pact);
+
+            String provider = jelement.getAsJsonObject().get("provider").getAsJsonObject().get("name").getAsString();
+            String consumer = jelement.getAsJsonObject().get("consumer").getAsJsonObject().get("name").getAsString();
+
+            String pactFileName = targetDirectory.getAbsolutePath() + "/" + consumer + "-" + provider + ".json";
+
+            try (PrintWriter printWriter = new PrintWriter(pactFileName)) {
+                printWriter.write(pact);
+                log.info("Writing pact file to " + pactFileName);
+            }
+        }
+    }
+
+    private String buildUploadPath(PactFile pact) {
+        return url + "/pacts/provider/" + pact.getProvider() + "/consumer/" + pact.getConsumer() + "/version/"
+                + consumerVersion;
+    }
+
+    private String buildDownloadLinksPath(String providerId) {
+        return url + "/pacts/provider/" + providerId + "/latest";
+    }
 }
