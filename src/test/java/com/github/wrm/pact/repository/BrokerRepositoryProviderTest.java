@@ -79,7 +79,7 @@ public class BrokerRepositoryProviderTest {
 
     @Test
     @PactVerification("one-pact-present")
-    public void downloadPactFromBroker_IsNotSupported() throws Exception {
+    public void downloadPactFromBroker() throws Exception {
         File pactFoder = new File(temporaryFolder.newFolder() + "/target/pacts-dependents");
 
         brokerRepositoryProvider.downloadPactsFromLinks(Collections.singletonList(pactLink), pactFoder);
