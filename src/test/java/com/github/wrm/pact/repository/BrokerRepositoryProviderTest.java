@@ -72,8 +72,14 @@ public class BrokerRepositoryProviderTest {
     }
 
     @Test
+    @PactVerification("pact-already-uploaded")
+    public void uploadExistingPactToBroker() throws Exception {
+        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact));
+    }
+
+    @Test
     @PactVerification("one-pact-present")
-    public void downloadPactFromBroker_IsNotSupported() throws Exception {
+    public void downloadPactFromBroker() throws Exception {
         File pactFoder = new File(temporaryFolder.newFolder() + "/target/pacts-dependents");
 
         brokerRepositoryProvider.downloadPactsFromLinks(Collections.singletonList(pactLink), pactFoder);
@@ -95,44 +101,39 @@ public class BrokerRepositoryProviderTest {
     @Pact(state = "no-pacts-present", provider = "broker-maven-plugin", consumer = "pact-broker")
     public PactFragment createFragmentForUploading(PactDslWithState builder) {
 
-        Map<String, String> responseHeaders = new HashMap<>();
-        responseHeaders.put("Content-Type", "application/json");
-
-        Map<String, String> requestHeaders = new HashMap<>();
-        requestHeaders.put("Content-Type", "application/json");
-
         return builder
                 .uponReceiving("a pact file")
                 .path("/pacts/provider/" + PROVIDER_NAME + "/consumer/" + CONSUMER_NAME + "/version/"
-                        + CONSUMER_VERSION).body(pactJson).headers(requestHeaders).method("PUT").willRespondWith()
-                .headers(responseHeaders).status(200).body(pactJson).toFragment();
+                        + CONSUMER_VERSION).body(pactJson).headers(getHeaders()).method("PUT").willRespondWith()
+                .headers(getHeaders()).status(201).body(pactJson).toFragment();
+    }
+
+    @Pact(state = "pact-already-uploaded", provider = "broker-maven-plugin", consumer = "pact-broker")
+    public PactFragment createFragmentForUploadingPact(PactDslWithState builder) {
+
+        return builder.uponReceiving("an already existing pact file").path(pactPath).headers(getHeaders())
+                .method("PUT").willRespondWith().headers(getHeaders()).status(200).body(pactJson).toFragment();
     }
 
     @Pact(state = "one-provider-pact-link-present", provider = "broker-maven-plugin", consumer = "pact-broker")
     public PactFragment createFragmentForDownloadingPactLinks(PactDslWithState builder) {
 
-        Map<String, String> responseHeaders = new HashMap<>();
-        responseHeaders.put("Content-Type", "application/json");
-
-        Map<String, String> requestHeaders = new HashMap<>();
-        requestHeaders.put("Content-Type", "application/json");
-
         return builder.uponReceiving("a request for the latest provider pacts")
-                .path("/pacts/provider/" + PROVIDER_NAME + "/latest").headers(requestHeaders).method("GET")
-                .willRespondWith().headers(responseHeaders).status(200).body(providerJson).toFragment();
+                .path("/pacts/provider/" + PROVIDER_NAME + "/latest").headers(getHeaders()).method("GET")
+                .willRespondWith().headers(getHeaders()).status(200).body(providerJson).toFragment();
     }
 
     @Pact(state = "one-pact-present", provider = "broker-maven-plugin", consumer = "pact-broker")
     public PactFragment createFragmentForDownloadingPact(PactDslWithState builder) {
 
-        Map<String, String> responseHeaders = new HashMap<>();
-        responseHeaders.put("Content-Type", "application/json");
+        return builder.uponReceiving("a request for the latest provider pacts").path(pactPath).headers(getHeaders())
+                .method("GET").willRespondWith().headers(getHeaders()).status(200).body(pactJson).toFragment();
+    }
 
-        Map<String, String> requestHeaders = new HashMap<>();
-        requestHeaders.put("Content-Type", "application/json");
-
-        return builder.uponReceiving("a request for the latest provider pacts").path(pactPath).headers(requestHeaders)
-                .method("GET").willRespondWith().headers(responseHeaders).status(200).body(pactJson).toFragment();
+    private Map<String, String> getHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        return headers;
     }
 
 }
