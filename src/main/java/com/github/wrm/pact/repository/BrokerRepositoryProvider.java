@@ -101,8 +101,10 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         byte[] content = Files.readAllBytes(Paths.get(pact.getPath()));
         connection.getOutputStream().write(content);
 
-        if (connection.getResponseCode() != 200) {
-            log.error("Uploading failed. Pact Broker answered with: " + connection.getContent());
+        if (connection.getResponseCode() > 201) {
+            try (Scanner scanner = new Scanner(connection.getInputStream(), StandardCharsets.UTF_8.displayName())) {
+                log.error("Uploading failed. Pact Broker answered with: " + scanner.useDelimiter("\\A").next());
+            }
         }
 
         connection.disconnect();
