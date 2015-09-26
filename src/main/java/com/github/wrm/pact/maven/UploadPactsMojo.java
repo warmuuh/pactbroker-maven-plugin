@@ -44,6 +44,12 @@ public class UploadPactsMojo extends AbstractPactsMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
 
         File folder = new File(pacts);
+
+        if(!folder.exists()){
+           getLog().warn(String.format("pact folder '%s' does not exist", pacts));
+           return;
+        }
+
         getLog().info("loading pacts from " + pacts);
         try {
             List<PactFile> pactList = readPacts(folder);
