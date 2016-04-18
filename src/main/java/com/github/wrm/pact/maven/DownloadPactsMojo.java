@@ -30,6 +30,8 @@ public class DownloadPactsMojo extends AbstractPactsMojo {
     @Parameter(defaultValue = "1.0.0")
     private String consumerVersion;
 
+    @Parameter
+    private String tagName;
     /**
      * Location of pacts
      */
@@ -47,7 +49,7 @@ public class DownloadPactsMojo extends AbstractPactsMojo {
 
         try {
             RepositoryProvider repoProvider = createRepositoryProvider(brokerUrl, consumerVersion);
-            repoProvider.downloadPacts(provider, new File(pacts));
+            repoProvider.downloadPacts(provider, tagName, new File(pacts));
         }
         catch (Throwable e) {
             throw new MojoExecutionException("Failed to download pacts", e);
