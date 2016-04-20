@@ -64,8 +64,10 @@ public class GitRepositoryProvider implements RepositoryProvider{
 	 */
 	@Override
 	@SuppressWarnings("unused")
-	public void downloadPacts(String providerId, File targetDirectory) throws Exception {
+	public void downloadPacts(String providerId, String tagName, File targetDirectory) throws Exception {
 		log.info("using pact repository: " + url);
+		if(tagName != null && !tagName.isEmpty())
+			throw new UnsupportedOperationException("\"tagName\" property not supported for git repository");
 		File repoDir = new File(path);
 		GitApi repository = initRepository(url, repoDir);
 		copyPactsFromRepository(repoDir, providerId, targetDirectory);

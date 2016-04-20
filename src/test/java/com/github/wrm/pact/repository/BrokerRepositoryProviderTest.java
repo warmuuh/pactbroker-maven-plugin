@@ -92,7 +92,16 @@ public class BrokerRepositoryProviderTest {
     @Test
     @PactVerification("one-provider-pact-link-present")
     public void downloadProviderPactInformation() throws Exception {
-        List<String> links = brokerRepositoryProvider.downloadPactLinks(PROVIDER_NAME);
+        List<String> links = brokerRepositoryProvider.downloadPactLinks(PROVIDER_NAME, null);
+
+        assertThat(links.size(), is(1));
+        assertThat(links.get(0), is(pactLink));
+    }
+
+    @Test
+    @PactVerification("one-prod-provider-pact-link-present")
+    public void downloadProviderPactInformationForProdTag() throws Exception {
+        List<String> links = brokerRepositoryProvider.downloadPactLinks(PROVIDER_NAME, "prod");
 
         assertThat(links.size(), is(1));
         assertThat(links.get(0), is(pactLink));
@@ -120,6 +129,14 @@ public class BrokerRepositoryProviderTest {
 
         return builder.uponReceiving("a request for the latest provider pacts")
                 .path("/pacts/provider/" + PROVIDER_NAME + "/latest").headers(getHeaders()).method("GET")
+                .willRespondWith().headers(getHeaders()).status(200).body(providerJson).toFragment();
+    }
+
+    @Pact(state = "one-prod-provider-pact-link-present", provider = "broker-maven-plugin", consumer = "pact-broker")
+    public PactFragment createFragmentForDownloadingPactLinksForProdTag(PactDslWithState builder) {
+
+        return builder.uponReceiving("a request for the latest provider pacts for the prod tag")
+                .path("/pacts/provider/" + PROVIDER_NAME + "/latest/prod").headers(getHeaders()).method("GET")
                 .willRespondWith().headers(getHeaders()).status(200).body(providerJson).toFragment();
     }
 

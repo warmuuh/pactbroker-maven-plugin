@@ -41,8 +41,8 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
     }
 
     @Override
-    public void downloadPacts(String providerId, File targetDirectory) throws Exception {
-        downloadPactsFromLinks(downloadPactLinks(providerId), targetDirectory);
+    public void downloadPacts(String providerId, String tagName, File targetDirectory) throws Exception {
+        downloadPactsFromLinks(downloadPactLinks(providerId, tagName), targetDirectory);
     }
 
     public void downloadPactsFromLinks(List<String> links, File targetDirectory) throws IOException {
@@ -53,8 +53,8 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         }
     }
 
-    public List<String> downloadPactLinks(String providerId) throws IOException {
-        String path = buildDownloadLinksPath(providerId);
+    public List<String> downloadPactLinks(String providerId, String tagName) throws IOException {
+        String path = buildDownloadLinksPath(providerId, tagName);
 
         log.info("Downloading pact links from " + path);
 
@@ -146,7 +146,12 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
                 + consumerVersion;
     }
 
-    private String buildDownloadLinksPath(String providerId) {
-        return url + "/pacts/provider/" + providerId + "/latest";
+    private String buildDownloadLinksPath(String providerId, String tagName) {
+        String downloadUrl = url + "/pacts/provider/" + providerId + "/latest";
+        if(tagName != null && !tagName.isEmpty()) {
+            return downloadUrl + "/" + tagName;
+        }
+        else
+            return downloadUrl;
     }
 }

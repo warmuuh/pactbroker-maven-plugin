@@ -21,6 +21,6 @@ public interface RepositoryProvider {
 	 * @param targetDirectory
 	 * @throws Exception
 	 */
-	public void downloadPacts(String providerId, File targetDirectory) throws Exception;
+	public void downloadPacts(String providerId, String tagName, File targetDirectory) throws Exception;
 
 }
