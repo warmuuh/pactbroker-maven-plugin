@@ -35,10 +35,19 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
 
     @Override
     public void uploadPacts(List<PactFile> pacts) throws Exception {
+        uploadPacts(pacts, null);
+    }
+
+    @Override
+    public void uploadPacts(List<PactFile> pacts, String tagName) throws Exception {
         for (PactFile pact : pacts) {
             uploadPact(pact);
+            if(tagName != null && !tagName.isEmpty()) {
+                tagPactVersion(pact, tagName);
+            }
         }
     }
+
 
     @Override
     public void downloadPacts(String providerId, String tagName, File targetDirectory) throws Exception {
@@ -110,6 +119,28 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         connection.disconnect();
     }
 
+    private void tagPactVersion(PactFile pact, String tagName) throws IOException {
+        String path = buildTaggingPath(pact, tagName);
+
+        log.info("Tagging pact version with path: " + path);
+
+        URL url = new URL(path);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setDoOutput(true);
+        connection.setDoInput(true);
+        connection.setRequestMethod("PUT");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("charset", StandardCharsets.UTF_8.displayName());
+
+        if (connection.getResponseCode() > 201) {
+            try (Scanner scanner = new Scanner(connection.getInputStream(), StandardCharsets.UTF_8.displayName())) {
+                log.error("Tagging pact version failed. Pact Broker answered with: " + scanner.useDelimiter("\\A").next());
+            }
+        }
+
+        connection.disconnect();
+    }
+
     private void downloadPactFromLink(File targetDirectory, String link) throws MalformedURLException, IOException,
             FileNotFoundException {
         URL url = new URL(link);
@@ -144,6 +175,12 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
     private String buildUploadPath(PactFile pact) {
         return url + "/pacts/provider/" + pact.getProvider() + "/consumer/" + pact.getConsumer() + "/version/"
                 + consumerVersion;
+    }
+
+    /*http://pact-broker/pacticipants/Zoo%20App/versions/1.0.0/tags/prod*/
+
+    private String buildTaggingPath(PactFile pact, String tagName) {
+        return url + "/pacticipants/" + pact.getConsumer() + "/versions/" + consumerVersion + "/tags/" + tagName;
     }
 
     private String buildDownloadLinksPath(String providerId, String tagName) {

@@ -37,14 +37,21 @@ public class GitRepositoryProvider implements RepositoryProvider{
 		this.url = url;
 		this.log = log;
 	}
-	
+
+	@Override
+	public void uploadPacts(List<PactFile> pacts) throws Exception {
+		uploadPacts(pacts, null);
+	}
+
 	/**
 	 * uploads all pact files to a git repo.
 	 * using following file structure:
 	 * *.git/provider/consumer/provider-consumer.json
 	 */
 	@Override
-	public void uploadPacts(List<PactFile> pacts) throws Exception {
+	public void uploadPacts(List<PactFile> pacts, String tagName) throws Exception {
+		if(tagName != null)
+			throw new UnsupportedOperationException("Tag names not supported for git repositories");
 		log.info("using pact repository: " + url);
 		File repoDir = new File(path);
 		GitApi repository = initRepository(url, repoDir);
