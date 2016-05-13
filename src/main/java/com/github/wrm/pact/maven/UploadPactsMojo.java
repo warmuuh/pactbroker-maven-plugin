@@ -40,6 +40,12 @@ public class UploadPactsMojo extends AbstractPactsMojo {
     @Parameter(defaultValue = "target/pacts")
     private String pacts;
 
+    /**
+     * Tag name to tag the consumer pact version with
+     */
+    @Parameter
+    private String tagName;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -54,7 +60,7 @@ public class UploadPactsMojo extends AbstractPactsMojo {
         try {
             List<PactFile> pactList = readPacts(folder);
             RepositoryProvider provider = createRepositoryProvider(brokerUrl, consumerVersion);
-            provider.uploadPacts(pactList);
+            provider.uploadPacts(pactList, tagName);
         }
         catch (Exception e) {
             throw new MojoExecutionException("Failed to read pacts", e);

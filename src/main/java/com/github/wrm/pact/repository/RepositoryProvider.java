@@ -12,7 +12,15 @@ public interface RepositoryProvider {
 	 * @param pacts
 	 * @throws Exception
 	 */
-	public void uploadPacts(List<PactFile> pacts) throws Exception;
+	void uploadPacts(List<PactFile> pacts) throws Exception;
+
+	/**
+	 * the provider uploads all given pacts to the given url and tags the uploaded version.
+	 * @param pacts
+	 * @param snapshot
+	 * @throws Exception
+	 */
+	public void uploadPacts(List<PactFile> pacts, String snapshot) throws Exception;
 	
 	
 	/**
