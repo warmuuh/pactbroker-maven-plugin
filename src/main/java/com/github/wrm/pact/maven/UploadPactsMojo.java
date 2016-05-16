@@ -37,7 +37,7 @@ public class UploadPactsMojo extends AbstractPactsMojo {
     /**
      * Location of pacts
      */
-    @Parameter(defaultValue = "target/pacts")
+    @Parameter(defaultValue = "${pact.rootDir}")
     private String pacts;
 
     /**
@@ -48,6 +48,10 @@ public class UploadPactsMojo extends AbstractPactsMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+
+        if(pacts == null || pacts.equals("${pact.rootDir}")) {
+            pacts = "target/pacts";
+        }
 
         File folder = new File(pacts);
 
