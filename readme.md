@@ -37,7 +37,7 @@ Configure plugin in your pom.xml using the *upload-pacts* goal:
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.5</version>
+      <version>0.0.6</version>
       <configuration>
         <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
         <pacts>target/pacts</pacts>
@@ -62,7 +62,7 @@ the *download-pacts* goal is used:
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.5</version>
+      <version>0.0.6</version>
       <configuration>
         <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
         <pacts>target/pacts-dependents</pacts>
