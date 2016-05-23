@@ -2,6 +2,7 @@ package com.github.wrm.pact.maven;
 
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Execute;
@@ -9,6 +10,8 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import com.github.wrm.pact.git.auth.GitAuthenticationProvider;
+import com.github.wrm.pact.git.auth.BasicGitCredentialsProvider;
 import com.github.wrm.pact.repository.RepositoryProvider;
 
 /**
@@ -43,12 +46,29 @@ public class DownloadPactsMojo extends AbstractPactsMojo {
      */
     @Parameter
     private String provider;
+    
+    /**
+     * username of git repository
+     */
+    @Parameter
+    private String username;
+    
+    /**
+     * password of git repository
+     */
+    @Parameter
+    private String password;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-
+        RepositoryProvider repoProvider;
         try {
-            RepositoryProvider repoProvider = createRepositoryProvider(brokerUrl, consumerVersion);
+            if(StringUtils.isNotEmpty(password)&& StringUtils.isNotEmpty(username)){
+                GitAuthenticationProvider credentialsProvider = new BasicGitCredentialsProvider();
+                repoProvider = createAuthenticatdeRepositoryProvider(brokerUrl, consumerVersion, credentialsProvider.getCredentialProvider(username, password));
+            }else{
+                repoProvider = createRepositoryProvider(brokerUrl, consumerVersion);
+            }
             repoProvider.downloadPacts(provider, tagName, new File(pacts));
         }
         catch (Throwable e) {
