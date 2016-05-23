@@ -37,7 +37,7 @@ Configure plugin in your pom.xml using the *upload-pacts* goal:
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.6</version>
+      <version>0.0.7</version>
       <configuration>
         <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
         <pacts>target/pacts</pacts>
@@ -62,7 +62,7 @@ the *download-pacts* goal is used:
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.6</version>
+      <version>0.0.7</version>
       <configuration>
         <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
         <pacts>target/pacts-dependents</pacts>
@@ -77,3 +77,14 @@ the *download-pacts* goal is used:
 </build>
 ```
 
+To provide credentials when using git repository while uploading 
+or downloading pacts, use the configuration sections as below:
+```xml
+    <configuration>
+      <brokerUrl>https://github.com/pact-repo.git</brokerUrl>
+      <pacts>target/pacts-dependents</pacts>
+	  <provider>provider</provider>
+      <username>user</username>
+	  <password>password</password>
+    </configuration>
+```
