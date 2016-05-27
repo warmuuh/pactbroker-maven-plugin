@@ -5,13 +5,14 @@ import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.eclipse.jgit.util.StringUtils;
 
 import com.github.wrm.pact.domain.PactFile;
 import com.github.wrm.pact.git.auth.GitAuthenticationProvider;
@@ -69,7 +70,7 @@ public class UploadPactsMojo extends AbstractPactsMojo {
         RepositoryProvider provider;
         try {
             List<PactFile> pactList = readPacts(folder);
-            if(StringUtils.isNotEmpty(password)&& StringUtils.isNotEmpty(username)){
+            if(!StringUtils.isEmptyOrNull(password)&& !StringUtils.isEmptyOrNull(username)){
                 GitAuthenticationProvider credentialsProvider = new BasicGitCredentialsProvider();
                 provider = createAuthenticatdeRepositoryProvider(brokerUrl, consumerVersion, credentialsProvider.getCredentialProvider(username, password));
             }else{
