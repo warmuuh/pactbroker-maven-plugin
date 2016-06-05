@@ -14,6 +14,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
 import org.apache.maven.plugin.logging.Log;
+import org.eclipse.jgit.transport.CredentialsProvider;
 
 import com.github.wrm.pact.domain.PactFile;
 import com.github.wrm.pact.git.GitApi;
@@ -33,6 +34,8 @@ public class GitRepositoryProvider implements RepositoryProvider{
 
 	private String url;
 	
+	private CredentialsProvider credentialsProvider;
+	
 	public GitRepositoryProvider(String url, Log log) {
 		this.url = url;
 		this.log = log;
@@ -43,6 +46,13 @@ public class GitRepositoryProvider implements RepositoryProvider{
 		uploadPacts(pacts, null);
 	}
 
+        public GitRepositoryProvider(String url, Log log, CredentialsProvider credentialsProvider) {
+            this.url = url;
+            this.log = log;
+            this.credentialsProvider = credentialsProvider;
+        }
+
+	
 	/**
 	 * uploads all pact files to a git repo.
 	 * using following file structure:
@@ -54,7 +64,12 @@ public class GitRepositoryProvider implements RepositoryProvider{
 			throw new UnsupportedOperationException("Tag names not supported for git repositories");
 		log.info("using pact repository: " + url);
 		File repoDir = new File(path);
-		GitApi repository = initRepository(url, repoDir);
+		GitApi repository;
+		if(credentialsProvider==null){
+		    repository = initRepository(url, repoDir);
+		}else{
+		    repository = initRepository(url, repoDir, credentialsProvider);
+		}
 		
 		copyPactsToRepository(repoDir, pacts);
 		boolean changesPushed = repository.pushChanges("pact commit");
@@ -76,7 +91,12 @@ public class GitRepositoryProvider implements RepositoryProvider{
 		if(tagName != null && !tagName.isEmpty())
 			throw new UnsupportedOperationException("\"tagName\" property not supported for git repository");
 		File repoDir = new File(path);
-		GitApi repository = initRepository(url, repoDir);
+		GitApi repository;
+	        if(credentialsProvider==null){
+	            repository = initRepository(url, repoDir);
+	        }else{
+	            repository = initRepository(url, repoDir, credentialsProvider);
+	        }
 		copyPactsFromRepository(repoDir, providerId, targetDirectory);
 	}
 	
@@ -111,6 +131,15 @@ public class GitRepositoryProvider implements RepositoryProvider{
 		repository.init(repoDir, url);
 		return repository;
 	}
+	
+       private GitApi initRepository(String url, File repoDir,CredentialsProvider credentialsProvider) throws Exception {
+                if (!repoDir.exists())
+                        repoDir.mkdirs();
+                
+                GitApi repository = new GitApi();
+                repository.initWithCredentials(repoDir, url, credentialsProvider);
+                return repository;
+        }
 	
 	/**
 	 * copies files form target/pacts/*.json to target/pact-git-temp/provider/consumer/*.json
