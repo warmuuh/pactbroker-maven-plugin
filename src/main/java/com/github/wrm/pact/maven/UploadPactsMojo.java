@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -11,8 +12,11 @@ import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.eclipse.jgit.util.StringUtils;
 
 import com.github.wrm.pact.domain.PactFile;
+import com.github.wrm.pact.git.auth.GitAuthenticationProvider;
+import com.github.wrm.pact.git.auth.BasicGitCredentialsProvider;
 import com.github.wrm.pact.repository.RepositoryProvider;
 
 /**
@@ -39,7 +43,19 @@ public class UploadPactsMojo extends AbstractPactsMojo {
      */
     @Parameter(defaultValue = "${pact.rootDir}")
     private String pacts;
-
+    
+    /**
+     * username of git repository
+     */
+    @Parameter
+    private String username;
+    
+    /**
+     * password of git repository
+     */
+    @Parameter
+    private String password;
+    
     /**
      * Tag name to tag the consumer pact version with
      */
@@ -61,9 +77,10 @@ public class UploadPactsMojo extends AbstractPactsMojo {
         }
 
         getLog().info("loading pacts from " + pacts);
+        
         try {
             List<PactFile> pactList = readPacts(folder);
-            RepositoryProvider provider = createRepositoryProvider(brokerUrl, consumerVersion);
+            RepositoryProvider provider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password));
             provider.uploadPacts(pactList, tagName);
         }
         catch (Exception e) {
