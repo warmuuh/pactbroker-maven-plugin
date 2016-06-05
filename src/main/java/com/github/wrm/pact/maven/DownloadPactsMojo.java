@@ -1,6 +1,7 @@
 package com.github.wrm.pact.maven;
 
 import java.io.File;
+import java.util.Optional;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -61,14 +62,8 @@ public class DownloadPactsMojo extends AbstractPactsMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        RepositoryProvider repoProvider;
         try {
-            if(!StringUtils.isEmptyOrNull(password)&& !StringUtils.isEmptyOrNull(username)){
-                GitAuthenticationProvider credentialsProvider = new BasicGitCredentialsProvider();
-                repoProvider = createAuthenticatdeRepositoryProvider(brokerUrl, consumerVersion, credentialsProvider.getCredentialProvider(username, password));
-            }else{
-                repoProvider = createRepositoryProvider(brokerUrl, consumerVersion);
-            }
+        	RepositoryProvider repoProvider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password));
             repoProvider.downloadPacts(provider, tagName, new File(pacts));
         }
         catch (Throwable e) {

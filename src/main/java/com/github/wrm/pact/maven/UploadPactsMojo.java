@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Optional;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -77,15 +77,10 @@ public class UploadPactsMojo extends AbstractPactsMojo {
         }
 
         getLog().info("loading pacts from " + pacts);
-        RepositoryProvider provider;
+        
         try {
             List<PactFile> pactList = readPacts(folder);
-            if(!StringUtils.isEmptyOrNull(password)&& !StringUtils.isEmptyOrNull(username)){
-                GitAuthenticationProvider credentialsProvider = new BasicGitCredentialsProvider();
-                provider = createAuthenticatdeRepositoryProvider(brokerUrl, consumerVersion, credentialsProvider.getCredentialProvider(username, password));
-            }else{
-                provider = createRepositoryProvider(brokerUrl, consumerVersion);
-            }
+            RepositoryProvider provider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password));
             provider.uploadPacts(pactList, tagName);
         }
         catch (Exception e) {
