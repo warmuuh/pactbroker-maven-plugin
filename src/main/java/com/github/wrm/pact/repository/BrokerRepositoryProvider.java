@@ -76,7 +76,8 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         List<String> links = new ArrayList<>();
 
         if (connection.getResponseCode() != 200) {
-            log.error("Downloading pact links failed. Pact Broker answered with: " + connection.getContent());
+            log.error("Downloading pact links failed. Pact Broker answered with status: " + connection.getResponseCode()
+                    + " and message: " + connection.getResponseMessage());
             return links;
         }
 
@@ -149,7 +150,8 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         connection.setDoInput(true);
 
         if (connection.getResponseCode() != 200) {
-            log.error("Downloading pact failed. Pact Broker answered with: " + connection.getContent());
+            log.error("Downloading pact failed. Pact Broker answered with status: " + connection.getResponseCode()
+                    + " and message: " + connection.getResponseMessage());
             return;
         }
 

@@ -115,6 +115,14 @@ public class BrokerRepositoryProviderTest {
         assertThat(links.get(0), is(pactLink));
     }
 
+    @Test
+    @PactVerification("provider-no-pact-link-present")
+    public void doNotFailDownloadForProviderWithNoPactLinkPresent() throws Exception {
+        List<String> links = brokerRepositoryProvider.downloadPactLinks("provider-no-pact-link-present", null);
+
+        assertThat(links.size(), is(0));
+    }
+
     @Pact(state = "no-pacts-present", provider = "broker-maven-plugin", consumer = "pact-broker")
     public PactFragment createFragmentForUploading(PactDslWithState builder) {
 
@@ -169,6 +177,13 @@ public class BrokerRepositoryProviderTest {
 
         return builder.uponReceiving("a request for the latest provider pacts").path(pactPath).headers(getHeaders())
                 .method("GET").willRespondWith().headers(getHeaders()).status(200).body(pactJson).toFragment();
+    }
+
+    @Pact(state = "provider-no-pact-link-present", provider = "broker-maven-plugin", consumer = "pact-broker")
+    public PactFragment createFragmentForDownloadingPactLinksOfProviderWithNoPactLinkPresent(PactDslWithState builder) {
+        return builder.uponReceiving("a request for the latest pacts of a provider with no link present")
+                .path("/pacts/provider/provider-no-pact-link-present/latest").headers(getHeaders()).method("GET")
+                .willRespondWith().headers(getHeaders()).status(404).toFragment();
     }
 
     private Map<String, String> getHeaders() {
