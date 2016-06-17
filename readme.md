@@ -38,13 +38,16 @@ Configure plugin in your pom.xml using the *upload-pacts* goal:
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
       <version>0.0.7</version>
-      <configuration>
-        <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
-        <pacts>target/pacts</pacts>
-      </configuration>
-      <executions><execution>
-        <goals><goal>upload-pacts</goal></goals>
-      </execution></executions>
+      <executions>
+        <execution>
+          <id>upload-pacts</id>
+          <goals><goal>upload-pacts</goal></goals>
+          <configuration>
+            <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
+            <pacts>${project.build.directory}/pacts</pacts>
+          </configuration>
+        </execution>
+      </executions>
     </plugin>
   </plugins>
 </build>
@@ -63,15 +66,18 @@ the *download-pacts* goal is used:
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
       <version>0.0.7</version>
-      <configuration>
-        <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
-        <pacts>target/pacts-dependents</pacts>
-        <provider>provider</provider>
-      </configuration>
-      <executions><execution>
-        <phase>generate-resources</phase>
-        <goals><goal>download-pacts</goal></goals>
-      </execution></executions>
+      <executions>
+        <execution>
+          <id>download-pacts</id>
+          <phase>generate-resources</phase>
+          <goals><goal>download-pacts</goal></goals>
+          <configuration>
+            <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
+            <pacts>${project.build.testOutputDirectory}/pacts-dependents</pacts>
+            <provider>provider</provider>
+          </configuration>
+        </execution>
+      </executions>
     </plugin>
   </plugins>
 </build>
