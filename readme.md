@@ -37,7 +37,7 @@ Configure plugin in your pom.xml using the *upload-pacts* goal:
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.7</version>
+      <version>0.0.8</version>
       <executions>
         <execution>
           <id>upload-pacts</id>
@@ -65,7 +65,7 @@ the *download-pacts* goal is used:
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.7</version>
+      <version>0.0.8</version>
       <executions>
         <execution>
           <id>download-pacts</id>
