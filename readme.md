@@ -44,7 +44,7 @@ Configure plugin in your pom.xml using the *upload-pacts* goal:
           <goals><goal>upload-pacts</goal></goals>
           <configuration>
             <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
-            <pacts>${project.build.directory}/pacts</pacts>
+            <consumerPacts>${project.build.directory}/pacts</consumerPacts>
           </configuration>
         </execution>
       </executions>
@@ -73,7 +73,7 @@ the *download-pacts* goal is used:
           <goals><goal>download-pacts</goal></goals>
           <configuration>
             <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
-            <pacts>${project.build.testOutputDirectory}/pacts-dependents</pacts>
+            <providerPacts>${project.build.testOutputDirectory}/pacts-dependents</providerPacts>
             <provider>provider</provider>
           </configuration>
         </execution>
@@ -82,8 +82,55 @@ the *download-pacts* goal is used:
   </plugins>
 </build>
 ```
+###Having consumer and producer in a multi-module project
+Configure plugin at the parent pom
+```xml
+<build>
+  <plugins>
+      <plugin>
+            <groupId>com.github.warmuuh</groupId>
+            <artifactId>pactbroker-maven-plugin</artifactId>
+            <version>0.0.8</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>upload-pacts</goal>
+                    </goals>
+                    <phase>test</phase>
+                </execution>
+                <execution>
+                    <id>download-pacts</id>
+                    <phase>generate-test-resources</phase>
+                    <goals>
+                        <goal>download-pacts</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+  </plugins>
+</build>
+```
 
-To provide credentials when using git repository while uploading 
+At **generate-test-resources** phase the relevant provider pacts will be downloaded to the providerPacts directory to be able to verify provider behavior against consumers, meanwhile consumer pats will be generated at the test phase.
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>com.github.warmuuh</groupId>
+      <artifactId>pactbroker-maven-plugin</artifactId>
+      <version>0.0.8</version>
+      <configuration>
+        <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
+        <consumerPacts>${project.build.directory}/pacts</consumerPacts>
+        <providerPacts>${project.build.testOutputDirectory}/pacts-dependents</providerPacts>
+        <provider>provider</provider>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
+```
+
+To provide credentials when using git repository while uploading
 or downloading pacts, use the configuration sections as below:
 ```xml
     <configuration>

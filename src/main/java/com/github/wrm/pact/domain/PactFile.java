@@ -45,37 +45,37 @@ public class PactFile {
         return new PactFile(file, consumer, provider, jelement.getAsJsonObject());
     }
 
-    public static PactFile merge(PactFile first, PactFile second) {
+    /**
+     * merges two pacts if the provider and the consumer is the same
+     *
+     * @param first
+     * @param second
+     * @return
+     */
+    public static PactFile merge(final PactFile first, final PactFile second) {
         try {
-            first.pact.getAsJsonArray("interactions").add(second.pact.getAsJsonArray("interactions").get(0));
+            first.pact.getAsJsonArray("interactions").addAll(second.pact.getAsJsonArray("interactions"));
 
-            deleteFileIfExists(first.getFile());
-            deleteFileIfExists(second.getFile());
+            javaslang.collection.List.of(first.getFile(), second.getFile()).forEach(PactFile::deleteFileIfExists);
 
             String relativePath = Paths.get(first.getFile().getAbsolutePath()).getParent() + "/" + first.getConsumer() + "_" + first.getProvider() + ".json";
-            System.out.println("New file for merge:" + relativePath);
             File merged = new File(relativePath);
 
             deleteFileIfExists(merged);
             merged.createNewFile();
 
-            System.out.println(">>>> merged to " + relativePath);
             PrintWriter pw = new PrintWriter(merged);
             pw.write(first.pact.toString());
             pw.close();
 
             return new PactFile(merged, first.getConsumer(), first.getProvider(), first.pact);
-
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    private static void deleteFileIfExists(File file) {
-        System.out.println("Delete pact for merge:" + file.getAbsolutePath());
-        if (file.exists()) {
-            file.delete();
-        }
+    private static void deleteFileIfExists(final File file) {
+        if (file.exists()) file.delete();
     }
 
     public File getFile() {
@@ -94,14 +94,4 @@ public class PactFile {
         return pact;
     }
 
-
-    @Override
-    public String toString() {
-        return "PactFile{" +
-                "file='" + file + '\'' +
-                ", consumer='" + consumer + '\'' +
-                ", provider='" + provider + '\'' +
-                ", pact=" + pact +
-                '}';
-    }
 }
