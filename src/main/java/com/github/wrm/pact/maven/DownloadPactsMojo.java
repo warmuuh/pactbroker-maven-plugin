@@ -1,25 +1,21 @@
 package com.github.wrm.pact.maven;
 
-import java.io.File;
-import java.util.Optional;
-
+import com.github.wrm.pact.repository.RepositoryProvider;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.eclipse.jgit.util.StringUtils;
 
-import com.github.wrm.pact.git.auth.BasicGitCredentialsProvider;
-import com.github.wrm.pact.git.auth.GitAuthenticationProvider;
-import com.github.wrm.pact.repository.RepositoryProvider;
+import java.io.File;
+import java.util.Optional;
 
 /**
- * Verifies all pacts that can be found for this provider
+ * Verifies all pats that can be found for this provider
  */
 @Mojo(name = "download-pacts")
-@Execute(phase = LifecyclePhase.GENERATE_TEST_RESOURCES)
+@Execute(phase = LifecyclePhase.NONE)
 public class DownloadPactsMojo extends AbstractPactsMojo {
 
     /**
@@ -37,23 +33,23 @@ public class DownloadPactsMojo extends AbstractPactsMojo {
     @Parameter
     private String tagName;
     /**
-     * Location of pacts
+     * Location of providerPacts
      */
-    @Parameter(defaultValue = "target/pacts-dependents")
-    private String pacts;
+    @Parameter(defaultValue = "${providerPacts.rootDir}")
+    private String providerPacts;
 
     /**
      * Name of this provider
      */
     @Parameter
     private String provider;
-    
+
     /**
      * username of git repository
      */
     @Parameter
     private String username;
-    
+
     /**
      * password of git repository
      */
@@ -62,12 +58,17 @@ public class DownloadPactsMojo extends AbstractPactsMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        try {
-        	RepositoryProvider repoProvider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password));
-            repoProvider.downloadPacts(provider, tagName, new File(pacts));
-        }
-        catch (Throwable e) {
-            throw new MojoExecutionException("Failed to download pacts", e);
+
+        if (providerPacts != null && !providerPacts.equals("${providerPacts.rootDir}")) {
+
+            try {
+                RepositoryProvider repoProvider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password));
+                repoProvider.downloadPacts(provider, tagName, new File(providerPacts));
+            } catch (Throwable e) {
+                throw new MojoExecutionException("Failed to download providerPacts", e);
+            }
+        } else {
+            getLog().info("<<<<<<<<<<< Skip download! providerPacts configuration is not provided...");
         }
     }
 

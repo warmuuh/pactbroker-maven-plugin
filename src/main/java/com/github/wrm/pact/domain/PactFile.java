@@ -1,59 +1,107 @@
 package com.github.wrm.pact.domain;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import java.io.PrintWriter;
+import java.nio.file.Paths;
 
 /**
  * holding informations about a pactFile
- * @author pmucha
  *
+ * @author pmucha
  */
 public class PactFile {
 
-	final String path;
-	final String consumer;
-	final String provider;
-	
-	private PactFile (String path, String consumer, String provider){
-		this.path = path;
-		this.consumer = consumer;
-		this.provider = provider;
-	};
-	
-	/**
-	 * reads the given file end extracts pact-details
-	 * @param file
-	 * @return
-	 * @throws FileNotFoundException
-	 */
-	public static PactFile readPactFile(File file) throws FileNotFoundException{
-		FileReader reader = new FileReader(file);
-		JsonElement jelement = new JsonParser().parse(reader);
-		
-		String provider = jelement.getAsJsonObject().get("provider").getAsJsonObject().get("name").getAsString();
-		String consumer = jelement.getAsJsonObject().get("consumer").getAsJsonObject().get("name").getAsString();
-		return new PactFile(file.getAbsolutePath(), consumer, provider);
-	}
+    final File file;
+    final String consumer;
+    final String provider;
+    final JsonObject pact;
 
-	public String getPath() {
-		return path;
-	}
+    private PactFile(File file, String consumer, String provider, JsonObject pact) {
+        this.file = file;
+        this.consumer = consumer;
+        this.provider = provider;
+        this.pact = pact;
+    }
 
-	public String getConsumer() {
-		return consumer;
-	}
+    /**
+     * reads the given file end extracts pact-details
+     *
+     * @param file
+     * @return
+     * @throws FileNotFoundException
+     */
+    public static PactFile readPactFile(File file) throws FileNotFoundException {
+        FileReader reader = new FileReader(file);
+        JsonElement jelement = new JsonParser().parse(reader);
 
-	public String getProvider() {
-		return provider;
-	}
-	
-	
-	
-	
-	
-	
+        String provider = jelement.getAsJsonObject().get("provider").getAsJsonObject().get("name").getAsString();
+        String consumer = jelement.getAsJsonObject().get("consumer").getAsJsonObject().get("name").getAsString();
+        return new PactFile(file, consumer, provider, jelement.getAsJsonObject());
+    }
+
+    public static PactFile merge(PactFile first, PactFile second) {
+        try {
+            first.pact.getAsJsonArray("interactions").add(second.pact.getAsJsonArray("interactions").get(0));
+
+            deleteFileIfExists(first.getFile());
+            deleteFileIfExists(second.getFile());
+
+            String relativePath = Paths.get(first.getFile().getAbsolutePath()).getParent() + "/" + first.getConsumer() + "_" + first.getProvider() + ".json";
+            System.out.println("New file for merge:" + relativePath);
+            File merged = new File(relativePath);
+
+            deleteFileIfExists(merged);
+            merged.createNewFile();
+
+            System.out.println(">>>> merged to " + relativePath);
+            PrintWriter pw = new PrintWriter(merged);
+            pw.write(first.pact.toString());
+            pw.close();
+
+            return new PactFile(merged, first.getConsumer(), first.getProvider(), first.pact);
+
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private static void deleteFileIfExists(File file) {
+        System.out.println("Delete pact for merge:" + file.getAbsolutePath());
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public String getConsumer() {
+        return consumer;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public JsonObject getPact() {
+        return pact;
+    }
+
+
+    @Override
+    public String toString() {
+        return "PactFile{" +
+                "file='" + file + '\'' +
+                ", consumer='" + consumer + '\'' +
+                ", provider='" + provider + '\'' +
+                ", pact=" + pact +
+                '}';
+    }
 }

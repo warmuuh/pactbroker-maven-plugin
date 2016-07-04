@@ -1,5 +1,11 @@
 package com.github.wrm.pact.repository;
 
+import com.github.wrm.pact.domain.PactFile;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import org.apache.maven.plugin.logging.Log;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -13,13 +19,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-import org.apache.maven.plugin.logging.Log;
-
-import com.github.wrm.pact.domain.PactFile;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 public class BrokerRepositoryProvider implements RepositoryProvider {
 
@@ -40,9 +39,12 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
 
     @Override
     public void uploadPacts(List<PactFile> pacts, String tagName) throws Exception {
-        for (PactFile pact : pacts) {
+
+        List<PactFile> merged = javaslang.collection.List.ofAll(pacts).groupBy(PactFile::getProvider).mapValues(l -> l.reduce(PactFile::merge)).values().toJavaList();
+
+        for (PactFile pact : merged) {
             uploadPact(pact);
-            if(tagName != null && !tagName.isEmpty()) {
+            if (tagName != null && !tagName.isEmpty()) {
                 tagPactVersion(pact, tagName);
             }
         }
@@ -108,7 +110,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setRequestProperty("charset", StandardCharsets.UTF_8.displayName());
 
-        byte[] content = Files.readAllBytes(Paths.get(pact.getPath()));
+        byte[] content = Files.readAllBytes(Paths.get(pact.getFile().getAbsolutePath()));
         connection.getOutputStream().write(content);
 
         if (connection.getResponseCode() > 201) {
@@ -187,10 +189,9 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
 
     private String buildDownloadLinksPath(String providerId, String tagName) {
         String downloadUrl = url + "/pacts/provider/" + providerId + "/latest";
-        if(tagName != null && !tagName.isEmpty()) {
+        if (tagName != null && !tagName.isEmpty()) {
             return downloadUrl + "/" + tagName;
-        }
-        else
+        } else
             return downloadUrl;
     }
 }

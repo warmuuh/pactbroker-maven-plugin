@@ -1,17 +1,14 @@
 package com.github.wrm.pact.maven;
 
-import java.util.Optional;
-
-import org.apache.maven.plugin.AbstractMojo;
-import org.codehaus.plexus.util.StringUtils;
-import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.CredentialItem.Password;
-
 import com.github.wrm.pact.git.auth.BasicGitCredentialsProvider;
-import com.github.wrm.pact.git.auth.GitAuthenticationProvider;
 import com.github.wrm.pact.repository.BrokerRepositoryProvider;
 import com.github.wrm.pact.repository.GitRepositoryProvider;
 import com.github.wrm.pact.repository.RepositoryProvider;
+import org.apache.maven.plugin.AbstractMojo;
+import org.codehaus.plexus.util.StringUtils;
+import org.eclipse.jgit.transport.CredentialsProvider;
+
+import java.util.Optional;
 
 public abstract class AbstractPactsMojo extends AbstractMojo {
 

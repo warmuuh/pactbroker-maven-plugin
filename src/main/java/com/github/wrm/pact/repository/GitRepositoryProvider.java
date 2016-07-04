@@ -128,7 +128,7 @@ public class GitRepositoryProvider implements RepositoryProvider{
 	private void copyPactsToRepository(File repoDir, List<PactFile> pacts) throws Exception {
 		log.debug("copying files to repository");
 		for (PactFile pact : pacts) {
-			File file = new File(pact.getPath());
+			File file = pact.getFile();
 			Path targetFile = Paths.get(repoDir.getAbsolutePath(), 
 										pact.getProvider(), 
 										pact.getConsumer(), 
