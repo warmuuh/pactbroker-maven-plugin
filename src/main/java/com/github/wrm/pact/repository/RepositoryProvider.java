@@ -20,7 +20,16 @@ public interface RepositoryProvider {
 	 * @param snapshot
 	 * @throws Exception
 	 */
-	public void uploadPacts(List<PactFile> pacts, String snapshot) throws Exception;
+	void uploadPacts(List<PactFile> pacts, String snapshot) throws Exception;
+
+	/**
+	 * the provider uploads all given pacts to the given url and tags the uploaded version.
+	 * @param pacts
+	 * @param snapshot
+	 * @param mergePacts
+	 * @throws Exception
+	 */
+	void uploadPacts(List<PactFile> pacts, String snapshot, boolean mergePacts) throws Exception;
 	
 	
 	/**
@@ -29,6 +38,6 @@ public interface RepositoryProvider {
 	 * @param targetDirectory
 	 * @throws Exception
 	 */
-	public void downloadPacts(String providerId, String tagName, File targetDirectory) throws Exception;
+	void downloadPacts(String providerId, String tagName, File targetDirectory) throws Exception;
 
 }

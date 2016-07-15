@@ -28,15 +28,15 @@ import com.github.wrm.pact.git.GitApi;
  */
 public class GitRepositoryProvider implements RepositoryProvider{
 
-	
+
 	String path = "target/pact-git-temp";
-	
+
 	Log log;
 
 	private String url;
-	
+
 	private  Optional<CredentialsProvider> credentialsProvider;
-	
+
 	public GitRepositoryProvider(String url, Log log, Optional<CredentialsProvider> credentialsProvider) {
         this.url = url;
         this.log = log;
@@ -45,19 +45,21 @@ public class GitRepositoryProvider implements RepositoryProvider{
 
 	@Override
 	public void uploadPacts(List<PactFile> pacts) throws Exception {
-		uploadPacts(pacts, null);
+		uploadPacts(pacts, null, false);
 	}
 
-        
+	@Override
+	public void uploadPacts(List<PactFile> pacts, String tagName) throws Exception {
+		uploadPacts(pacts, tagName, false);
+	}
 
-	
 	/**
 	 * uploads all pact files to a git repo.
 	 * using following file structure:
 	 * *.git/provider/consumer/provider-consumer.json
 	 */
 	@Override
-	public void uploadPacts(List<PactFile> pacts, String tagName) throws Exception {
+	public void uploadPacts(List<PactFile> pacts, String tagName, boolean mergePacts) throws Exception {
 		if(tagName != null)
 			throw new UnsupportedOperationException("Tag names not supported for git repositories");
 		log.info("using pact repository: " + url);
@@ -87,9 +89,9 @@ public class GitRepositoryProvider implements RepositoryProvider{
 		GitApi repository = initRepository(url, repoDir, credentialsProvider);
 		copyPactsFromRepository(repoDir, providerId, targetDirectory);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * copies files form  target/pact-git-temp/provider/consumer/*.json to target/pacts/'consumer'-'provider'.json
 	 */
@@ -101,17 +103,17 @@ public class GitRepositoryProvider implements RepositoryProvider{
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				if (matcher.matches(file)){
 					PactFile pact = PactFile.readPactFile(file.toFile());
-					Path targetFile = Paths.get(targetDirectory.getAbsolutePath(), 
+					Path targetFile = Paths.get(targetDirectory.getAbsolutePath(),
 							pact.getConsumer() + "-" +pact.getProvider() + ".json");
 					targetFile.toFile().mkdirs();
-					Files.copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING);	
+					Files.copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
 				}
 				return FileVisitResult.CONTINUE;
 			}
 		});
 	}
 
-	
+
 	private GitApi initRepository(String url, File repoDir, Optional<CredentialsProvider> credentialsProvider)
 			throws Exception {
 		if (!repoDir.exists())
@@ -121,7 +123,7 @@ public class GitRepositoryProvider implements RepositoryProvider{
 		repository.initWithCredentials(repoDir, url, credentialsProvider);
 		return repository;
 	}
-	
+
 	/**
 	 * copies files form target/pacts/*.json to target/pact-git-temp/provider/consumer/*.json
 	 */
@@ -129,9 +131,9 @@ public class GitRepositoryProvider implements RepositoryProvider{
 		log.debug("copying files to repository");
 		for (PactFile pact : pacts) {
 			File file = pact.getFile();
-			Path targetFile = Paths.get(repoDir.getAbsolutePath(), 
-										pact.getProvider(), 
-										pact.getConsumer(), 
+			Path targetFile = Paths.get(repoDir.getAbsolutePath(),
+										pact.getProvider(),
+										pact.getConsumer(),
 										file.getName());
 			targetFile.toFile().mkdirs();
 			Files.copy(file.toPath(), targetFile, StandardCopyOption.REPLACE_EXISTING);
@@ -139,7 +141,7 @@ public class GitRepositoryProvider implements RepositoryProvider{
 	}
 
 
-	
 
-	
+
+
 }

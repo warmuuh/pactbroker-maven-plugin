@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Verifies all consumerPacts that can be found for this provider
+ * Verifies all pacts that can be found for this provider
  */
 @Mojo(name = "upload-pacts")
 @Execute(phase = LifecyclePhase.NONE)
@@ -35,10 +35,10 @@ public class UploadPactsMojo extends AbstractPactsMojo {
     private String consumerVersion;
 
     /**
-     * Location of consumerPacts
+     * Location of pacts
      */
-    @Parameter(defaultValue = "${consumerPacts.rootDir}")
-    private String consumerPacts;
+    @Parameter(defaultValue = "${pact.rootDir}")
+    private String pacts;
 
     /**
      * username of git repository
@@ -58,31 +58,36 @@ public class UploadPactsMojo extends AbstractPactsMojo {
     @Parameter
     private String tagName;
 
+    /**
+     * Flat to allow pacts merge based on producer and consumer
+     */
+    @Parameter(defaultValue = "false")
+    private boolean mergePacts;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
-        if (consumerPacts != null && !consumerPacts.equals("${consumerPacts.rootDir}")) {
-
-            File folder = new File(consumerPacts);
-
-            if (!folder.exists()) {
-                getLog().warn(String.format("consumer pact folder '%s' does not exist", consumerPacts));
-                return;
-            }
-
-            getLog().info("loading consumerPacts from " + consumerPacts);
-
-            try {
-                List<PactFile> pactList = readPacts(folder);
-                RepositoryProvider provider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password));
-                provider.uploadPacts(pactList, tagName);
-            } catch (Exception e) {
-                throw new MojoExecutionException("Failed to read consumerPacts", e);
-            }
-        } else {
-            getLog().info("<<<<<<<<<<< Skip upload pacts! consumerPacts configuration is not provided...");
+        if(pacts == null || pacts.equals("${pact.rootDir}")) {
+            pacts = "target/pacts";
         }
 
+        File folder = new File(pacts);
+
+        if(!folder.exists()){
+            getLog().warn(String.format("pact folder '%s' does not exist", pacts));
+            return;
+        }
+
+        getLog().info("loading pacts from " + pacts);
+
+        try {
+            List<PactFile> pactList = readPacts(folder);
+            RepositoryProvider provider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password));
+            provider.uploadPacts(pactList, tagName, mergePacts);
+        }
+        catch (Exception e) {
+            throw new MojoExecutionException("Failed to read pacts", e);
+        }
     }
 
     private List<PactFile> readPacts(File folder) throws FileNotFoundException {

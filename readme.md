@@ -44,7 +44,7 @@ Configure plugin in your pom.xml using the *upload-pacts* goal:
           <goals><goal>upload-pacts</goal></goals>
           <configuration>
             <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
-            <consumerPacts>${project.build.directory}/pacts</consumerPacts>
+            <pacts>${project.build.directory}/pacts</pacts>
           </configuration>
         </execution>
       </executions>
@@ -52,7 +52,6 @@ Configure plugin in your pom.xml using the *upload-pacts* goal:
   </plugins>
 </build>
 ```
-
 
 ###Producer
 
@@ -96,11 +95,11 @@ Configure plugin at the parent pom
                     <goals>
                         <goal>upload-pacts</goal>
                     </goals>
-                    <phase>verify</phase>
+                    <phase>none</phase>
                 </execution>
                 <execution>
                     <id>download-pacts</id>
-                    <phase>generate-test-resources</phase>
+                    <phase>none</phase>
                     <goals>
                         <goal>download-pacts</goal>
                     </goals>
@@ -119,17 +118,57 @@ At *generate-test-resources* phase the relevant provider pacts will be downloade
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
       <version>0.0.8</version>
-      <configuration>
-        <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
-        <consumerPacts>${project.build.directory}/pacts</consumerPacts>
-        <providerPacts>${project.build.testOutputDirectory}/pacts-dependents</providerPacts>
-        <provider>provider</provider>
-      </configuration>
+          <executions>
+              <execution>
+                  <goals>
+                      <goal>upload-pacts</goal>
+                  </goals>
+                  <phase>verify</phase>
+                  <configuration>
+                    <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
+                    <pacts>${project.build.directory}/pacts</pacts>
+                  </configuration>
+              </execution>
+              <execution>
+                  <id>download-pacts</id>
+                  <phase>generate-test-resources</phase>
+                  <goals>
+                      <goal>download-pacts</goal>
+                  </goals>
+                  <configuration>
+                    <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
+                    <pacts>${project.build.testOutputDirectory}/pacts-dependents</pacts>
+                    <provider>provider</provider>
+                  </configuration>
+              </execution>
+          </executions>
     </plugin>
   </plugins>
 </build>
 ```
-
+If you are using [scala-pact](https://github.com/ITV/scala-pact) from ITV to generate pacts than it generates separate pact file for all the tests. Before you upload it to the broker you might want to group and merge them based on the provider and customer name. Use **mergePacts** config element to force pact merge before upload to the broker
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>com.github.warmuuh</groupId>
+      <artifactId>pactbroker-maven-plugin</artifactId>
+      <version>0.0.8</version>
+      <executions>
+        <execution>
+          <id>upload-pacts</id>
+          <goals><goal>upload-pacts</goal></goals>
+          <configuration>
+            <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
+            <pacts>${project.build.directory}/pacts</pacts>
+            <mergePacts>true</mergePacts>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+```
 To provide credentials when using git repository while uploading
 or downloading pacts, use the configuration sections as below:
 ```xml

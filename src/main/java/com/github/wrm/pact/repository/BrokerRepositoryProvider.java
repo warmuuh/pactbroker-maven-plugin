@@ -34,15 +34,24 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
 
     @Override
     public void uploadPacts(List<PactFile> pacts) throws Exception {
-        uploadPacts(pacts, null);
+        uploadPacts(pacts, null, false);
     }
 
     @Override
-    public void uploadPacts(List<PactFile> pacts, String tagName) throws Exception {
+    public void uploadPacts(List<PactFile> pacts, final String tagName) throws Exception {
+        uploadPacts(pacts, tagName, false);
+    }
 
-        List<PactFile> merged = javaslang.collection.List.ofAll(pacts).groupBy(PactFile::getProvider).mapValues(l -> l.reduce(PactFile::merge)).values().toJavaList();
+    @Override
+    public void uploadPacts(final List<PactFile> pacts, final String tagName, boolean mergePacts) throws Exception {
 
-        for (PactFile pact : merged) {
+        List<PactFile> uploadables = pacts;
+
+        if (mergePacts) {
+            uploadables = javaslang.collection.List.ofAll(pacts).groupBy(p -> p.getProvider() + "-" + p.getConsumer()).mapValues(l -> l.reduce(PactFile::merge)).values().toJavaList();
+        }
+
+        for (PactFile pact : uploadables) {
             uploadPact(pact);
             if (tagName != null && !tagName.isEmpty()) {
                 tagPactVersion(pact, tagName);
