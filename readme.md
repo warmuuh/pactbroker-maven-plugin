@@ -175,7 +175,7 @@ or downloading pacts, use the configuration sections as below:
     <configuration>
       <brokerUrl>https://github.com/pact-repo.git</brokerUrl>
       <pacts>target/pacts-dependents</pacts>
-	  <providerPacts>provider</providerPacts>
+	  <provider>provider</provider>
       <username>user</username>
 	  <password>password</password>
     </configuration>

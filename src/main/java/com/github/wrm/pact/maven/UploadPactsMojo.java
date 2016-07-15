@@ -1,7 +1,11 @@
 package com.github.wrm.pact.maven;
 
-import com.github.wrm.pact.domain.PactFile;
-import com.github.wrm.pact.repository.RepositoryProvider;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Execute;
@@ -9,11 +13,8 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import com.github.wrm.pact.domain.PactFile;
+import com.github.wrm.pact.repository.RepositoryProvider;
 
 /**
  * Verifies all pacts that can be found for this provider
@@ -91,7 +92,7 @@ public class UploadPactsMojo extends AbstractPactsMojo {
     }
 
     private List<PactFile> readPacts(File folder) throws FileNotFoundException {
-        List<PactFile> pacts = new LinkedList<PactFile>();
+        List<PactFile> pacts = new LinkedList<>();
         File[] listOfFiles = folder.listFiles();
         for (File file : listOfFiles) {
             String fileName = file.getName();

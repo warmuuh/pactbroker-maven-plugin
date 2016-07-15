@@ -1,6 +1,8 @@
 package com.github.wrm.pact.maven;
 
-import com.github.wrm.pact.repository.RepositoryProvider;
+import java.io.File;
+import java.util.Optional;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Execute;
@@ -8,8 +10,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import java.io.File;
-import java.util.Optional;
+import com.github.wrm.pact.repository.RepositoryProvider;
 
 /**
  * Verifies all pacts that can be found for this provider
