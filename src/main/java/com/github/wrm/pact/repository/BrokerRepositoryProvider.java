@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 import org.apache.maven.plugin.logging.Log;
@@ -34,16 +35,11 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
     }
 
     @Override
-    public void uploadPacts(List<PactFile> pacts) throws Exception {
-        uploadPacts(pacts, null);
-    }
-
-    @Override
-    public void uploadPacts(List<PactFile> pacts, String tagName) throws Exception {
+    public void uploadPacts(final List<PactFile> pacts, final Optional<String> tagName) throws Exception {
         for (PactFile pact : pacts) {
             uploadPact(pact);
-            if(tagName != null && !tagName.isEmpty()) {
-                tagPactVersion(pact, tagName);
+            if(tagName.isPresent()) {
+                tagPactVersion(pact, tagName.get());
             }
         }
     }
@@ -108,7 +104,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setRequestProperty("charset", StandardCharsets.UTF_8.displayName());
 
-        byte[] content = Files.readAllBytes(Paths.get(pact.getPath()));
+        byte[] content = Files.readAllBytes(Paths.get(pact.getFile().getAbsolutePath()));
         connection.getOutputStream().write(content);
 
         if (connection.getResponseCode() > 201) {

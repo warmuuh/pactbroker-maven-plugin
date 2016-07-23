@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.warmuuh</groupId>
   <artifactId>pactbroker-maven-plugin</artifactId>
-  <version>0.0.8</version>
+  <version>0.0.9</version>
   <packaging>maven-plugin</packaging>
 
   <properties>
@@ -21,6 +21,11 @@
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
       <version>3.2.5</version>
+    </dependency>
+    <dependency>
+      <groupId>io.javaslang</groupId>
+      <artifactId>javaslang</artifactId>
+      <version>2.0.2</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
