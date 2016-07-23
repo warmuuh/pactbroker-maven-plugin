@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.junit.Before;
@@ -32,7 +33,7 @@ public class BrokerRepositoryProviderTest {
     private static final String PROVIDER_NAME = "a_provider";
     private static final String CONSUMER_NAME = "a_consumer";
     private static final String CONSUMER_VERSION = "1.0.0";
-    private static final String TAG_NAME = "snapshot";
+    private static final Optional<String> TAG_NAME = Optional.of("snapshot");
 
     private int port = OpenPortProvider.getOpenPort();
 
@@ -75,14 +76,14 @@ public class BrokerRepositoryProviderTest {
     @Test
     @PactVerification("no-pacts-present")
     public void uploadPactToBroker() throws Exception {
-        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact));
+        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), Optional.empty());
     }
 
 
     @Test
     @PactVerification("pact-already-uploaded")
     public void uploadExistingPactToBroker() throws Exception {
-        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), null);
+        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), Optional.empty());
     }
 
     @Test
@@ -144,7 +145,7 @@ public class BrokerRepositoryProviderTest {
                         + CONSUMER_VERSION).body(pactJson).headers(getHeaders()).method("PUT").willRespondWith()
                 .headers(getHeaders()).status(201).body(pactJson)
                 .uponReceiving("a pact tagging request")
-                .path("/pacticipants/" + CONSUMER_NAME + "/versions/" + CONSUMER_VERSION + "/tags/" + TAG_NAME).headers(getHeaders()).method("PUT").willRespondWith()
+                .path("/pacticipants/" + CONSUMER_NAME + "/versions/" + CONSUMER_VERSION + "/tags/" + TAG_NAME.get()).headers(getHeaders()).method("PUT").willRespondWith()
                 .headers(getHeaders()).status(201)
                 .toFragment();
     }

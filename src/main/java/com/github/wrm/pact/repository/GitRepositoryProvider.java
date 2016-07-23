@@ -38,15 +38,6 @@ public class GitRepositoryProvider implements RepositoryProvider {
         this.credentialsProvider = credentialsProvider;
     }
 
-    @Override
-    public void uploadPacts(List<PactFile> pacts) throws Exception {
-        uploadPacts(pacts, null, false);
-    }
-
-    @Override
-    public void uploadPacts(List<PactFile> pacts, String tagName) throws Exception {
-        uploadPacts(pacts, tagName, false);
-    }
 
     /**
      * uploads all pact files to a git repo.
@@ -54,8 +45,8 @@ public class GitRepositoryProvider implements RepositoryProvider {
      * *.git/provider/consumer/provider-consumer.json
      */
     @Override
-    public void uploadPacts(List<PactFile> pacts, String tagName, boolean mergePacts) throws Exception {
-        if (tagName != null)
+    public void uploadPacts(List<PactFile> pacts, Optional<String> tagName) throws Exception {
+        if (tagName.isPresent())
             throw new UnsupportedOperationException("Tag names not supported for git repositories");
         log.info("using pact repository: " + url);
         File repoDir = new File(path);

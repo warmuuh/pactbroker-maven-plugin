@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 import org.apache.maven.plugin.logging.Log;
@@ -34,28 +35,11 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
     }
 
     @Override
-    public void uploadPacts(List<PactFile> pacts) throws Exception {
-        uploadPacts(pacts, null, false);
-    }
-
-    @Override
-    public void uploadPacts(List<PactFile> pacts, final String tagName) throws Exception {
-        uploadPacts(pacts, tagName, false);
-    }
-
-    @Override
-    public void uploadPacts(final List<PactFile> pacts, final String tagName, boolean mergePacts) throws Exception {
-
-        List<PactFile> uploadables = pacts;
-
-        if (mergePacts) {
-            uploadables = javaslang.collection.List.ofAll(pacts).groupBy(p -> p.getProvider() + "-" + p.getConsumer()).mapValues(l -> l.reduce(PactFile::merge)).values().toJavaList();
-        }
-
-        for (PactFile pact : uploadables) {
+    public void uploadPacts(final List<PactFile> pacts, final Optional<String> tagName) throws Exception {
+        for (PactFile pact : pacts) {
             uploadPact(pact);
-            if(tagName != null && !tagName.isEmpty()) {
-                tagPactVersion(pact, tagName);
+            if(tagName.isPresent()) {
+                tagPactVersion(pact, tagName.get());
             }
         }
     }

@@ -2,34 +2,20 @@ package com.github.wrm.pact.repository;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 import com.github.wrm.pact.domain.PactFile;
 
 public interface RepositoryProvider {
 
 	/**
-	 * the provider uploads all given pacts to the given url.
+	 * the provider uploads all given pacts to the given url and tags the uploaded version, if given.
 	 * @param pacts
+	 * @param tagName
 	 * @throws Exception
 	 */
-	void uploadPacts(List<PactFile> pacts) throws Exception;
+	void uploadPacts(List<PactFile> pacts, Optional<String> tagName) throws Exception;
 
-	/**
-	 * the provider uploads all given pacts to the given url and tags the uploaded version.
-	 * @param pacts
-	 * @param snapshot
-	 * @throws Exception
-	 */
-	void uploadPacts(List<PactFile> pacts, String snapshot) throws Exception;
-
-	/**
-	 * the provider uploads all given pacts to the given url and tags the uploaded version.
-	 * @param pacts
-	 * @param snapshot
-	 * @param mergePacts
-	 * @throws Exception
-	 */
-	void uploadPacts(List<PactFile> pacts, String snapshot, boolean mergePacts) throws Exception;
 	
 	
 	/**

@@ -83,8 +83,10 @@ public class UploadPactsMojo extends AbstractPactsMojo {
 
         try {
             List<PactFile> pactList = readPacts(folder);
+            if (mergePacts)
+            	pactList = mergePactsWithSameProviderConsumer(pactList);
             RepositoryProvider provider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password));
-            provider.uploadPacts(pactList, tagName, mergePacts);
+            provider.uploadPacts(pactList, Optional.ofNullable(tagName).filter(s -> !s.isEmpty()));
         }
         catch (Exception e) {
             throw new MojoExecutionException("Failed to read pacts", e);
@@ -103,6 +105,13 @@ public class UploadPactsMojo extends AbstractPactsMojo {
             }
         }
         return pacts;
+    }
+    
+    private List<PactFile> mergePactsWithSameProviderConsumer(List<PactFile> pacts) {
+       return javaslang.collection.List.ofAll(pacts)
+        		.groupBy(p -> p.getProvider() + "-" + p.getConsumer())
+        		.mapValues(l -> l.reduce(PactFile::mergePactsAndDeleteRemains))
+        		.values().toJavaList();
     }
 
 }

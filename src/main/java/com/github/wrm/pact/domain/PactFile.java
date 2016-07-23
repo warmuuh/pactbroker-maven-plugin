@@ -47,12 +47,13 @@ public class PactFile {
 
     /**
      * merges two pacts if the provider and the consumer is the same
+     * deletes the old files and creates a new file with merged pacts
      *
      * @param first
      * @param second
      * @return
      */
-    public static PactFile merge(final PactFile first, final PactFile second) {
+    public static PactFile mergePactsAndDeleteRemains(final PactFile first, final PactFile second) {
         try {
             first.pact.getAsJsonArray("interactions").addAll(second.pact.getAsJsonArray("interactions"));
 
