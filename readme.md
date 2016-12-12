@@ -37,7 +37,7 @@ Configure plugin in your pom.xml using the *upload-pacts* goal:
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.9</version>
+      <version>0.0.10</version>
       <executions>
         <execution>
           <id>upload-pacts</id>
@@ -65,7 +65,7 @@ the *download-pacts* goal is used:
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.9</version>
+      <version>0.0.10</version>
       <executions>
         <execution>
           <id>download-pacts</id>
@@ -90,7 +90,7 @@ Configure plugin at the parent pom
       <plugin>
             <groupId>com.github.warmuuh</groupId>
             <artifactId>pactbroker-maven-plugin</artifactId>
-            <version>0.0.9</version>
+            <version>0.0.10</version>
             <executions>
                 <execution>
                     <goals>
@@ -118,7 +118,7 @@ At *generate-test-resources* phase the relevant provider pacts will be downloade
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.9</version>
+      <version>0.0.10</version>
           <executions>
               <execution>
                   <goals>
@@ -154,7 +154,7 @@ If you are using [scala-pact](https://github.com/ITV/scala-pact) from ITV to gen
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.9</version>
+      <version>0.0.10</version>
       <executions>
         <execution>
           <id>upload-pacts</id>
