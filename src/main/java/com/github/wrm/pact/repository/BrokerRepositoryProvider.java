@@ -108,7 +108,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         connection.getOutputStream().write(content);
 
         if (connection.getResponseCode() > 201) {
-            try (Scanner scanner = new Scanner(connection.getInputStream(), StandardCharsets.UTF_8.displayName())) {
+            try (Scanner scanner = new Scanner(connection.getErrorStream(), StandardCharsets.UTF_8.displayName())) {
                 log.error("Uploading failed. Pact Broker answered with: " + scanner.useDelimiter("\\A").next());
             }
         }
@@ -130,7 +130,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         connection.setRequestProperty("charset", StandardCharsets.UTF_8.displayName());
 
         if (connection.getResponseCode() > 201) {
-            try (Scanner scanner = new Scanner(connection.getInputStream(), StandardCharsets.UTF_8.displayName())) {
+            try (Scanner scanner = new Scanner(connection.getErrorStream(), StandardCharsets.UTF_8.displayName())) {
                 log.error("Tagging pact version failed. Pact Broker answered with: " + scanner.useDelimiter("\\A").next());
             }
         }

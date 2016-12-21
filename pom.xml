@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.warmuuh</groupId>
   <artifactId>pactbroker-maven-plugin</artifactId>
-  <version>0.0.9</version>
+  <version>0.0.10</version>
   <packaging>maven-plugin</packaging>
 
   <properties>
@@ -64,8 +64,8 @@
 
   <build>
     <plugins>
-    
-    
+
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
@@ -120,7 +120,7 @@
 
   <reporting>
     <plugins>
-    
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -151,5 +151,5 @@
       </plugin>
     </plugins>
   </reporting>
-  
+
 </project>
