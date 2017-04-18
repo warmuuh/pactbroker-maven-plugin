@@ -1,5 +1,6 @@
 package com.github.wrm.pact.repository;
 
+import static java.util.Optional.empty;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -55,7 +56,7 @@ public class BrokerRepositoryProviderTest {
         }
         pact = PactFile.readPactFile(pactFile);
         brokerRepositoryProvider = new BrokerRepositoryProvider("http://localhost:" + port, CONSUMER_VERSION,
-                new SystemStreamLog());
+                                                                new SystemStreamLog(), empty(), empty());
     }
 
     @Rule
@@ -76,14 +77,14 @@ public class BrokerRepositoryProviderTest {
     @Test
     @PactVerification("no-pacts-present")
     public void uploadPactToBroker() throws Exception {
-        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), Optional.empty());
+        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), empty());
     }
 
 
     @Test
     @PactVerification("pact-already-uploaded")
     public void uploadExistingPactToBroker() throws Exception {
-        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), Optional.empty());
+        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), empty());
     }
 
     @Test

@@ -28,7 +28,7 @@ public abstract class AbstractPactsMojo extends AbstractMojo {
             Optional<CredentialsProvider> credentialProvider = getCredentialsProvider(username, password);
             return new GitRepositoryProvider(url, getLog(), credentialProvider);
         }
-        return new BrokerRepositoryProvider(url, consumerVersion, getLog());
+        return new BrokerRepositoryProvider(url, consumerVersion, getLog(), username, password);
     }
 
 
