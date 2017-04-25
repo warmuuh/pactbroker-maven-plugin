@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.maven.plugin.logging.Log;
 
 import com.github.wrm.pact.domain.PactFile;
@@ -22,16 +23,26 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import static org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString;
+
 public class BrokerRepositoryProvider implements RepositoryProvider {
 
     private final String url;
     private final String consumerVersion;
     private final Log log;
+    private final Optional<String> username;
+    private final Optional<String> password;
 
-    public BrokerRepositoryProvider(String url, String consumerVersion, Log log) {
+    public BrokerRepositoryProvider(String url,
+                                    String consumerVersion,
+                                    Log log,
+                                    Optional<String> username,
+                                    Optional<String> password) {
         this.url = url;
         this.consumerVersion = consumerVersion;
         this.log = log;
+        this.username = username;
+        this.password = password;
     }
 
     @Override
@@ -68,6 +79,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setDoInput(true);
         connection.setDoOutput(true);
+        addBasicAuthTo(connection);
 
         List<String> links = new ArrayList<>();
 
@@ -103,6 +115,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         connection.setRequestMethod("PUT");
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setRequestProperty("charset", StandardCharsets.UTF_8.displayName());
+        addBasicAuthTo(connection);
 
         byte[] content = Files.readAllBytes(Paths.get(pact.getFile().getAbsolutePath()));
         connection.getOutputStream().write(content);
@@ -128,6 +141,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         connection.setRequestMethod("PUT");
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setRequestProperty("charset", StandardCharsets.UTF_8.displayName());
+        addBasicAuthTo(connection);
 
         if (connection.getResponseCode() > 201) {
             try (Scanner scanner = new Scanner(connection.getErrorStream(), StandardCharsets.UTF_8.displayName())) {
@@ -144,6 +158,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setDoInput(true);
+        addBasicAuthTo(connection);
 
         if (connection.getResponseCode() != 200) {
             log.error("Downloading pact failed. Pact Broker answered with status: " + connection.getResponseCode()
@@ -167,6 +182,15 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
                 printWriter.write(pact);
                 log.info("Writing pact file to " + pactFileName);
             }
+        }
+    }
+
+    private void addBasicAuthTo(HttpURLConnection connection)
+    {
+        if (username.isPresent() && password.isPresent()) {
+            String userpass = username.get() + ":" + password.get();
+            String basicAuth = "Basic " + encodeBase64URLSafeString(userpass.getBytes());
+            connection.setRequestProperty ("Authorization", basicAuth);
         }
     }
 

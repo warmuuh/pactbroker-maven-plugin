@@ -181,3 +181,15 @@ or downloading pacts, use the configuration sections as below:
 	  <password>password</password>
     </configuration>
 ```
+
+To provide credentials when using a pact broker with HTTP basic auth, 
+use the configuration sections as below:
+```xml
+    <configuration>
+      <brokerUrl>https://yourbroker.pact.dius.com.au</brokerUrl>
+      <pacts>target/pacts-dependents</pacts>
+	  <provider>provider</provider>
+      <username>user</username>
+	  <password>password</password>
+    </configuration>
+```
