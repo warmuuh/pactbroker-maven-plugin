@@ -1,5 +1,11 @@
 package com.github.wrm.pact.repository;
 
+import com.github.wrm.pact.domain.PactFile;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import org.apache.maven.plugin.logging.Log;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,14 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.maven.plugin.logging.Log;
-
-import com.github.wrm.pact.domain.PactFile;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 import static org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString;
 
@@ -76,7 +74,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
 
         URL url = new URL(path);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("Accept", "application/json");
         connection.setDoInput(true);
         connection.setDoOutput(true);
         addBasicAuthTo(connection);
@@ -113,6 +111,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         connection.setDoOutput(true);
         connection.setDoInput(true);
         connection.setRequestMethod("PUT");
+        connection.setRequestProperty("Accept", "application/json");
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setRequestProperty("charset", StandardCharsets.UTF_8.displayName());
         addBasicAuthTo(connection);
@@ -156,7 +155,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
             FileNotFoundException {
         URL url = new URL(link);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("Accept", "application/json");
         connection.setDoInput(true);
         addBasicAuthTo(connection);
 

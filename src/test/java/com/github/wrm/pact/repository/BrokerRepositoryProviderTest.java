@@ -1,18 +1,12 @@
 package com.github.wrm.pact.repository;
 
-import static java.util.Optional.empty;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import java.io.File;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import au.com.dius.pact.consumer.ConsumerPactBuilder.PactDslWithProvider.PactDslWithState;
+import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.consumer.PactRule;
+import au.com.dius.pact.consumer.PactVerification;
+import au.com.dius.pact.model.PactFragment;
+import com.github.wrm.pact.OpenPortProvider;
+import com.github.wrm.pact.domain.PactFile;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.junit.Before;
 import org.junit.Rule;
@@ -20,14 +14,14 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
-import au.com.dius.pact.consumer.ConsumerPactBuilder.PactDslWithProvider.PactDslWithState;
-import au.com.dius.pact.consumer.Pact;
-import au.com.dius.pact.consumer.PactRule;
-import au.com.dius.pact.consumer.PactVerification;
-import au.com.dius.pact.model.PactFragment;
+import java.io.File;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
-import com.github.wrm.pact.OpenPortProvider;
-import com.github.wrm.pact.domain.PactFile;
+import static java.util.Optional.empty;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class BrokerRepositoryProviderTest {
 
@@ -131,8 +125,8 @@ public class BrokerRepositoryProviderTest {
         return builder
                 .uponReceiving("a pact file")
                 .path("/pacts/provider/" + PROVIDER_NAME + "/consumer/" + CONSUMER_NAME + "/version/"
-                        + CONSUMER_VERSION).body(pactJson).headers(getHeaders()).method("PUT").willRespondWith()
-                .headers(getHeaders()).status(201).body(pactJson)
+                        + CONSUMER_VERSION).body(pactJson).headers(getWriteRequestHeaders()).method("PUT").willRespondWith()
+                .headers(getResponseHeaders()).status(201).body(pactJson)
                 .toFragment();
     }
 
@@ -143,52 +137,65 @@ public class BrokerRepositoryProviderTest {
         return builder
                 .uponReceiving("a pact file")
                 .path("/pacts/provider/" + PROVIDER_NAME + "/consumer/" + CONSUMER_NAME + "/version/"
-                        + CONSUMER_VERSION).body(pactJson).headers(getHeaders()).method("PUT").willRespondWith()
-                .headers(getHeaders()).status(201).body(pactJson)
+                        + CONSUMER_VERSION).body(pactJson).headers(getWriteRequestHeaders()).method("PUT").willRespondWith()
+                .headers(getResponseHeaders()).status(201).body(pactJson)
                 .uponReceiving("a pact tagging request")
-                .path("/pacticipants/" + CONSUMER_NAME + "/versions/" + CONSUMER_VERSION + "/tags/" + TAG_NAME.get()).headers(getHeaders()).method("PUT").willRespondWith()
-                .headers(getHeaders()).status(201)
+                .path("/pacticipants/" + CONSUMER_NAME + "/versions/" + CONSUMER_VERSION + "/tags/" + TAG_NAME.get()).headers(getResponseHeaders()).method("PUT").willRespondWith()
+                .headers(getResponseHeaders()).status(201)
                 .toFragment();
     }
 
     @Pact(state = "pact-already-uploaded", provider = "broker-maven-plugin", consumer = "pact-broker")
     public PactFragment createFragmentForUploadingPact(PactDslWithState builder) {
 
-        return builder.uponReceiving("an already existing pact file").path(pactPath).headers(getHeaders())
-                .method("PUT").willRespondWith().headers(getHeaders()).status(200).body(pactJson).toFragment();
+        return builder.uponReceiving("an already existing pact file").path(pactPath).headers(getWriteRequestHeaders())
+                .method("PUT").willRespondWith().headers(getResponseHeaders()).status(200).body(pactJson).toFragment();
     }
 
     @Pact(state = "one-provider-pact-link-present", provider = "broker-maven-plugin", consumer = "pact-broker")
     public PactFragment createFragmentForDownloadingPactLinks(PactDslWithState builder) {
 
         return builder.uponReceiving("a request for the latest provider pacts")
-                .path("/pacts/provider/" + PROVIDER_NAME + "/latest").headers(getHeaders()).method("GET")
-                .willRespondWith().headers(getHeaders()).status(200).body(providerJson).toFragment();
+                .path("/pacts/provider/" + PROVIDER_NAME + "/latest").headers(getReadRequestHeaders()).method("GET")
+                .willRespondWith().headers(getResponseHeaders()).status(200).body(providerJson).toFragment();
     }
 
     @Pact(state = "one-prod-provider-pact-link-present", provider = "broker-maven-plugin", consumer = "pact-broker")
     public PactFragment createFragmentForDownloadingPactLinksForProdTag(PactDslWithState builder) {
 
         return builder.uponReceiving("a request for the latest provider pacts for the prod tag")
-                .path("/pacts/provider/" + PROVIDER_NAME + "/latest/prod").headers(getHeaders()).method("GET")
-                .willRespondWith().headers(getHeaders()).status(200).body(providerJson).toFragment();
+                .path("/pacts/provider/" + PROVIDER_NAME + "/latest/prod").headers(getReadRequestHeaders()).method("GET")
+                .willRespondWith().headers(getResponseHeaders()).status(200).body(providerJson).toFragment();
     }
 
     @Pact(state = "one-pact-present", provider = "broker-maven-plugin", consumer = "pact-broker")
     public PactFragment createFragmentForDownloadingPact(PactDslWithState builder) {
 
-        return builder.uponReceiving("a request for the latest provider pacts").path(pactPath).headers(getHeaders())
-                .method("GET").willRespondWith().headers(getHeaders()).status(200).body(pactJson).toFragment();
+        return builder.uponReceiving("a request for the latest provider pacts").path(pactPath).headers(getReadRequestHeaders())
+                .method("GET").willRespondWith().headers(getResponseHeaders()).status(200).body(pactJson).toFragment();
     }
 
     @Pact(state = "provider-no-pact-link-present", provider = "broker-maven-plugin", consumer = "pact-broker")
     public PactFragment createFragmentForDownloadingPactLinksOfProviderWithNoPactLinkPresent(PactDslWithState builder) {
         return builder.uponReceiving("a request for the latest pacts of a provider with no link present")
-                .path("/pacts/provider/provider-no-pact-link-present/latest").headers(getHeaders()).method("GET")
-                .willRespondWith().headers(getHeaders()).status(404).toFragment();
+                .path("/pacts/provider/provider-no-pact-link-present/latest").headers(getReadRequestHeaders()).method("GET")
+                .willRespondWith().headers(getResponseHeaders()).status(404).toFragment();
     }
 
-    private Map<String, String> getHeaders() {
+    private Map<String, String> getReadRequestHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Accept", "application/json");
+        return headers;
+    }
+
+    private Map<String, String> getWriteRequestHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Accept", "application/json");
+        headers.put("Content-Type", "application/json");
+        return headers;
+    }
+
+    private Map<String, String> getResponseHeaders() {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         return headers;
