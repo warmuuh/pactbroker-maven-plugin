@@ -75,6 +75,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         URL url = new URL(path);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestProperty("Accept", "application/json");
+        connection.setRequestProperty("Accept", "application/hal+json");
         connection.setDoInput(true);
         connection.setDoOutput(true);
         addBasicAuthTo(connection);
@@ -156,6 +157,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
         URL url = new URL(link);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestProperty("Accept", "application/json");
+        connection.setRequestProperty("Accept", "application/hal+json");
         connection.setDoInput(true);
         addBasicAuthTo(connection);
 
