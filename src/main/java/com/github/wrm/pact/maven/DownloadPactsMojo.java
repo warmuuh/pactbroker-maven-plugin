@@ -51,6 +51,9 @@ public class DownloadPactsMojo extends AbstractPactsMojo {
     @Parameter
     private String username;
 
+    @Parameter(defaultValue = "false")
+    private boolean insecure;
+
     /**
      * password of git repository
      */
@@ -60,7 +63,7 @@ public class DownloadPactsMojo extends AbstractPactsMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            RepositoryProvider repoProvider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password));
+            RepositoryProvider repoProvider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password), insecure);
             repoProvider.downloadPacts(provider, tagName, new File(pacts));
         }
         catch (Throwable e) {

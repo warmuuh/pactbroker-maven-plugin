@@ -59,6 +59,9 @@ public class UploadPactsMojo extends AbstractPactsMojo {
     @Parameter
     private String tagName;
 
+    @Parameter(defaultValue = "false")
+    private boolean insecure;
+
     /**
      * Flat to allow pacts merge based on producer and consumer
      */
@@ -85,7 +88,7 @@ public class UploadPactsMojo extends AbstractPactsMojo {
             List<PactFile> pactList = readPacts(folder);
             if (mergePacts)
             	pactList = mergePactsWithSameProviderConsumer(pactList);
-            RepositoryProvider provider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password));
+            RepositoryProvider provider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password), insecure);
             provider.uploadPacts(pactList, Optional.ofNullable(tagName).filter(s -> !s.isEmpty()));
         }
         catch (Exception e) {
