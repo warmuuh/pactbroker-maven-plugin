@@ -50,7 +50,7 @@ public class BrokerRepositoryProviderTest {
         }
         pact = PactFile.readPactFile(pactFile);
         brokerRepositoryProvider = new BrokerRepositoryProvider("http://localhost:" + port, CONSUMER_VERSION,
-                                                                new SystemStreamLog(), empty(), empty());
+                                                                new SystemStreamLog(), empty(), empty(), false);
     }
 
     @Rule

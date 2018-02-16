@@ -13,6 +13,11 @@ import com.github.wrm.pact.repository.RepositoryProvider;
 
 public abstract class AbstractPactsMojo extends AbstractMojo {
 
+    protected RepositoryProvider createRepositoryProvider(String url, String consumerVersion,
+                                                          Optional<String> username, Optional<String> password) {
+        return this.createRepositoryProvider(url, consumerVersion, username, password, false);
+    }
+
     /**
      * returns an implementation of RepositorProvider based on given url
      *
@@ -23,12 +28,12 @@ public abstract class AbstractPactsMojo extends AbstractMojo {
      * @return
      */
     protected RepositoryProvider createRepositoryProvider(String url, String consumerVersion,
-                                                          Optional<String> username, Optional<String> password) {
+                                                          Optional<String> username, Optional<String> password, boolean insecure) {
         if (url.endsWith(".git")){
             Optional<CredentialsProvider> credentialProvider = getCredentialsProvider(username, password);
             return new GitRepositoryProvider(url, getLog(), credentialProvider);
         }
-        return new BrokerRepositoryProvider(url, consumerVersion, getLog(), username, password);
+        return new BrokerRepositoryProvider(url, consumerVersion, getLog(), username, password, insecure);
     }
 
 
