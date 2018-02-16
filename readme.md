@@ -193,3 +193,4 @@ use the configuration sections as below:
 	  <password>password</password>
     </configuration>
 ```
+you can also supply `<insecure>true</insecure>` to ignore certificate validation
