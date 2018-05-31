@@ -24,10 +24,10 @@ cd pactbroker-maven-plugin
 mvn install
 ```
 
-##Usage
+## Usage
 
 
-###Consumer
+### Consumer
 
 Configure plugin in your pom.xml using the *upload-pacts* goal:
 
@@ -37,7 +37,7 @@ Configure plugin in your pom.xml using the *upload-pacts* goal:
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.10</version>
+      <version>0.0.14</version>
       <executions>
         <execution>
           <id>upload-pacts</id>
@@ -54,7 +54,7 @@ Configure plugin in your pom.xml using the *upload-pacts* goal:
 </build>
 ```
 
-###Producer
+### Producer
 
 Configure plugin in your pom.xml. This time,
 the *download-pacts* goal is used:
@@ -65,7 +65,7 @@ the *download-pacts* goal is used:
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.10</version>
+      <version>0.0.14</version>
       <executions>
         <execution>
           <id>download-pacts</id>
@@ -82,7 +82,7 @@ the *download-pacts* goal is used:
   </plugins>
 </build>
 ```
-###Having consumer and producer in a multi-module project
+### Having consumer and producer in a multi-module project
 Configure plugin at the parent pom
 ```xml
 <build>
@@ -90,7 +90,7 @@ Configure plugin at the parent pom
       <plugin>
             <groupId>com.github.warmuuh</groupId>
             <artifactId>pactbroker-maven-plugin</artifactId>
-            <version>0.0.10</version>
+            <version>0.0.14</version>
             <executions>
                 <execution>
                     <goals>
@@ -118,7 +118,7 @@ At *generate-test-resources* phase the relevant provider pacts will be downloade
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.10</version>
+      <version>0.0.14</version>
           <executions>
               <execution>
                   <goals>
@@ -154,7 +154,7 @@ If you are using [scala-pact](https://github.com/ITV/scala-pact) from ITV to gen
     <plugin>
       <groupId>com.github.warmuuh</groupId>
       <artifactId>pactbroker-maven-plugin</artifactId>
-      <version>0.0.10</version>
+      <version>0.0.14</version>
       <executions>
         <execution>
           <id>upload-pacts</id>
@@ -170,15 +170,16 @@ If you are using [scala-pact](https://github.com/ITV/scala-pact) from ITV to gen
   </plugins>
 </build>
 ```
+### Security
 To provide credentials when using git repository while uploading
 or downloading pacts, use the configuration sections as below:
 ```xml
     <configuration>
       <brokerUrl>https://github.com/pact-repo.git</brokerUrl>
       <pacts>target/pacts-dependents</pacts>
-	  <provider>provider</provider>
+      <provider>provider</provider>
       <username>user</username>
-	  <password>password</password>
+      <password>password</password>
     </configuration>
 ```
 
@@ -188,9 +189,77 @@ use the configuration sections as below:
     <configuration>
       <brokerUrl>https://yourbroker.pact.dius.com.au</brokerUrl>
       <pacts>target/pacts-dependents</pacts>
-	  <provider>provider</provider>
+      <provider>provider</provider>
       <username>user</username>
-	  <password>password</password>
+      <password>password</password>
     </configuration>
 ```
-you can also supply `<insecure>true</insecure>` to ignore certificate validation
+You can also supply `<insecure>true</insecure>` to ignore certificate validation.
+
+### Tagging Pacts
+[Tagging pact versions](https://github.com/pact-foundation/pact_broker/wiki/Using-tags) is a useful technique that is supported on pact uploads. There are multiple methods available for you to tag your pacts.
+
+#### From command line
+Running a build and passing a list of tags to the parameter `-Dpact.tagNames` will upload the pacts and tag the version as directed.
+
+For example, running `mvn clean install -Dpact.tagNames=foo,bar,baz` will upload the pacts and tag the uploaded version with the tags "foo", "bar", and "baz".
+
+#### List tags in pom
+This example will upload the pact as version 1.2.3, and tag that version with the tags "foo", "bar", and "baz".
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>com.github.warmuuh</groupId>
+      <artifactId>pactbroker-maven-plugin</artifactId>
+      <version>0.0.14</version>
+      <executions>
+        <execution>
+          <id>upload-pacts</id>
+          <phase>test</phase>
+          <goals><goal>upload-pacts</goal></goals>
+          <configuration>
+            <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
+            <pacts>${project.build.directory}/pacts</pacts>
+            <consumerVersion>1.2.3</consumerVersion>
+            <tagNames>
+              <tagName>foo</tagName>
+              <tagName>bar</tagName>
+              <tagName>baz</tagName>
+            </tagNames>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+```
+
+**Note:** Tag names in the pom will override tags provided from the command line.
+
+#### Single tag (legacy)
+Kept in for backwards compatibility, you can provide a single `tagName` in the pom.
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>com.github.warmuuh</groupId>
+      <artifactId>pactbroker-maven-plugin</artifactId>
+      <version>0.0.14</version>
+      <executions>
+        <execution>
+          <id>upload-pacts</id>
+          <phase>test</phase>
+          <goals><goal>upload-pacts</goal></goals>
+          <configuration>
+            <brokerUrl>ssh://gitlab/pact-repo.git</brokerUrl>
+            <pacts>${project.build.directory}/pacts</pacts>
+            <consumerVersion>1.2.3</consumerVersion>
+            <tagName>i-am-a-lonely-tag</tagName>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+```
