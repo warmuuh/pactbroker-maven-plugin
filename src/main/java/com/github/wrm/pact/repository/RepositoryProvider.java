@@ -2,7 +2,6 @@ package com.github.wrm.pact.repository;
 
 import java.io.File;
 import java.util.List;
-import java.util.Optional;
 
 import com.github.wrm.pact.domain.PactFile;
 
@@ -14,7 +13,7 @@ public interface RepositoryProvider {
 	 * @param tagName
 	 * @throws Exception
 	 */
-	void uploadPacts(List<PactFile> pacts, Optional<String> tagName) throws Exception;
+	void uploadPacts(List<PactFile> pacts, List<String> tagName) throws Exception;
 
 	
 	
