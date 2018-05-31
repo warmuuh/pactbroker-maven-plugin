@@ -28,7 +28,8 @@ public class BrokerRepositoryProviderTest {
     private static final String PROVIDER_NAME = "a_provider";
     private static final String CONSUMER_NAME = "a_consumer";
     private static final String CONSUMER_VERSION = "1.0.0";
-    private static final Optional<String> TAG_NAME = Optional.of("snapshot");
+    private static final List<String> SINGLE_TAG_NAME = Collections.singletonList("snapshot");
+    private static final List<String> LIST_TAG_NAMES = Arrays.asList("snapshot", "test");
 
     private int port = OpenPortProvider.getOpenPort();
 
@@ -63,22 +64,28 @@ public class BrokerRepositoryProviderTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Test
-    @PactVerification("no-pacts-present-with-tagging")
+    @PactVerification("no-pacts-present-with-single-tagging")
     public void uploadAndTagPactInBroker() throws Exception {
-        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), TAG_NAME);
+        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), SINGLE_TAG_NAME);
+    }
+
+    @Test
+    @PactVerification("no-pacts-present-with-list-tagging")
+    public void uploadAndMultiTagPactInBroker() throws Exception {
+        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), LIST_TAG_NAMES);
     }
 
     @Test
     @PactVerification("no-pacts-present")
     public void uploadPactToBroker() throws Exception {
-        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), empty());
+        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), Collections.emptyList());
     }
 
 
     @Test
     @PactVerification("pact-already-uploaded")
     public void uploadExistingPactToBroker() throws Exception {
-        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), empty());
+        brokerRepositoryProvider.uploadPacts(Collections.singletonList(pact), Collections.emptyList());
     }
 
     @Test
@@ -131,8 +138,8 @@ public class BrokerRepositoryProviderTest {
     }
 
 
-    @Pact(state = "no-pacts-present-with-tagging", provider = "broker-maven-plugin", consumer = "pact-broker")
-    public PactFragment createFragmentForUploadingAndTagging(PactDslWithState builder) {
+    @Pact(state = "no-pacts-present-with-single-tagging", provider = "broker-maven-plugin", consumer = "pact-broker")
+    public PactFragment createFragmentForUploadingAndSingleTagging(PactDslWithState builder) {
 
         return builder
                 .uponReceiving("a pact file")
@@ -140,7 +147,24 @@ public class BrokerRepositoryProviderTest {
                         + CONSUMER_VERSION).body(pactJson).headers(getWriteRequestHeaders()).method("PUT").willRespondWith()
                 .headers(getResponseHeaders()).status(201).body(pactJson)
                 .uponReceiving("a pact tagging request")
-                .path("/pacticipants/" + CONSUMER_NAME + "/versions/" + CONSUMER_VERSION + "/tags/" + TAG_NAME.get()).headers(getResponseHeaders()).method("PUT").willRespondWith()
+                .path("/pacticipants/" + CONSUMER_NAME + "/versions/" + CONSUMER_VERSION + "/tags/" + SINGLE_TAG_NAME.get(0)).headers(getResponseHeaders()).method("PUT").willRespondWith()
+                .headers(getResponseHeaders()).status(201)
+                .toFragment();
+    }
+
+    @Pact(state = "no-pacts-present-with-list-tagging", provider = "broker-maven-plugin", consumer = "pact-broker")
+    public PactFragment createFragmentForUploadingAndListTagging(PactDslWithState builder) {
+
+        return builder
+                .uponReceiving("a pact file")
+                .path("/pacts/provider/" + PROVIDER_NAME + "/consumer/" + CONSUMER_NAME + "/version/"
+                        + CONSUMER_VERSION).body(pactJson).headers(getWriteRequestHeaders()).method("PUT").willRespondWith()
+                .headers(getResponseHeaders()).status(201).body(pactJson)
+                .uponReceiving("a pact tagging request")
+                .path("/pacticipants/" + CONSUMER_NAME + "/versions/" + CONSUMER_VERSION + "/tags/" + LIST_TAG_NAMES.get(0)).headers(getResponseHeaders()).method("PUT").willRespondWith()
+                .headers(getResponseHeaders()).status(201)
+                .uponReceiving("a pact tagging request")
+                .path("/pacticipants/" + CONSUMER_NAME + "/versions/" + CONSUMER_VERSION + "/tags/" + LIST_TAG_NAMES.get(1)).headers(getResponseHeaders()).method("PUT").willRespondWith()
                 .headers(getResponseHeaders()).status(201)
                 .toFragment();
     }
@@ -184,13 +208,13 @@ public class BrokerRepositoryProviderTest {
 
     private Map<String, String> getReadRequestHeaders() {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Accept", "application/json");
+        headers.put("Accept", "application/json,application/hal+json");
         return headers;
     }
 
     private Map<String, String> getWriteRequestHeaders() {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Accept", "application/json");
+        headers.put("Accept", "application/json,application/hal+json");
         headers.put("Content-Type", "application/json");
         return headers;
     }

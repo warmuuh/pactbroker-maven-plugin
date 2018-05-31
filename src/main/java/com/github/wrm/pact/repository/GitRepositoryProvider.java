@@ -45,8 +45,8 @@ public class GitRepositoryProvider implements RepositoryProvider {
      * *.git/provider/consumer/provider-consumer.json
      */
     @Override
-    public void uploadPacts(List<PactFile> pacts, Optional<String> tagName) throws Exception {
-        if (tagName.isPresent())
+    public void uploadPacts(List<PactFile> pacts, List<String> tagNames) throws Exception {
+        if (!tagNames.isEmpty())
             throw new UnsupportedOperationException("Tag names not supported for git repositories");
         log.info("using pact repository: " + url);
         File repoDir = new File(path);

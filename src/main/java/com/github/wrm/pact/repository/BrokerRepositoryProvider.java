@@ -65,11 +65,11 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
     }
 
     @Override
-    public void uploadPacts(final List<PactFile> pacts, final Optional<String> tagName) throws Exception {
+    public void uploadPacts(final List<PactFile> pacts, final List<String> tagNames) throws Exception {
         for (PactFile pact : pacts) {
             uploadPact(pact);
-            if(tagName.isPresent()) {
-                tagPactVersion(pact, tagName.get());
+            for(String tagName : tagNames) {
+                tagPactVersion(pact, tagName);
             }
         }
     }
@@ -254,7 +254,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
     }
 
     private HttpUriRequest createRequest(HttpUriRequest request) {
-        request.setHeader("Accept", "application/json");
+        request.setHeader("Accept", "application/json,application/hal+json");
         request.setHeader("Content-Type", "application/json");
         request.setHeader("charset", StandardCharsets.UTF_8.displayName());
         addBasicAuthTo(request);

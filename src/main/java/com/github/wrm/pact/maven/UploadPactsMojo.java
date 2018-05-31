@@ -2,9 +2,11 @@ package com.github.wrm.pact.maven;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -59,6 +61,12 @@ public class UploadPactsMojo extends AbstractPactsMojo {
     @Parameter
     private String tagName;
 
+    /**
+     * List of tag names to tag the consumer pact version with
+     */
+    @Parameter(defaultValue = "${pact.tagNames}")
+    private String[] tagNames;
+
     @Parameter(defaultValue = "false")
     private boolean insecure;
 
@@ -89,7 +97,13 @@ public class UploadPactsMojo extends AbstractPactsMojo {
             if (mergePacts)
             	pactList = mergePactsWithSameProviderConsumer(pactList);
             RepositoryProvider provider = createRepositoryProvider(brokerUrl, consumerVersion, Optional.ofNullable(username), Optional.ofNullable(password), insecure);
-            provider.uploadPacts(pactList, Optional.ofNullable(tagName).filter(s -> !s.isEmpty()));
+
+            if(tagNames == null && tagName != null) {
+                tagNames = new String[1];
+                tagNames[0] = tagName;
+            }
+
+            provider.uploadPacts(pactList, Arrays.asList(tagNames).stream().filter(s -> !s.isEmpty()).collect(Collectors.toList()));
         }
         catch (Exception e) {
             throw new MojoExecutionException("Failed to read pacts", e);
