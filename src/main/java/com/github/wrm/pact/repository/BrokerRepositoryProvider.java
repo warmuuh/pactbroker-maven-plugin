@@ -254,7 +254,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
     }
 
     private HttpUriRequest createRequest(HttpUriRequest request) {
-        request.setHeader("Accept", "application/json");
+        request.setHeader("Accept", "application/json,application/hal+json");
         request.setHeader("Content-Type", "application/json");
         request.setHeader("charset", StandardCharsets.UTF_8.displayName());
         addBasicAuthTo(request);
