@@ -155,7 +155,7 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
             HttpUriRequest request = createRequest(new HttpPut(path));
             CloseableHttpResponse response = createClient().execute(request);
             if (response.getStatusLine().getStatusCode() > 201) {
-                handleRequestError("Tagging pact version failed. Pact Broker answered with", response);
+                handleRequestError("Tagging pact version failed. Pact Broker answered with: ", response);
             }
             response.close();
         } catch (KeyStoreException | NoSuchAlgorithmException | KeyManagementException e) {
@@ -263,11 +263,17 @@ public class BrokerRepositoryProvider implements RepositoryProvider {
 
     private void handleRequestError(String message, CloseableHttpResponse response) {
         HttpEntity entity = response.getEntity();
-        if (entity != null && entity.getContentLength() > 0) {
-            try (Scanner scanner = new Scanner(entity.getContent(), StandardCharsets.UTF_8.displayName())) {
-                log.error(message + scanner.useDelimiter("\\A").next());
-            } catch (IOException e) {
-                log.error(e);
+        if (entity == null) {
+            log.error(message + "null entity");
+        } else {
+            if(entity.getContentLength() > 0) {
+                try (Scanner scanner = new Scanner(entity.getContent(), StandardCharsets.UTF_8.displayName())) {
+                    log.error(message + scanner.useDelimiter("\\A").next());
+                } catch (IOException e) {
+                    log.error(e);
+                }
+            } else {
+                log.error(message + response.getStatusLine());
             }
         }
     }
